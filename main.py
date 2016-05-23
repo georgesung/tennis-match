@@ -1,59 +1,62 @@
-#!/usr/bin/env python
+'''
+The API backend
+'''
 
-# [START imports]
+from datetime import datetime
+import json
 import os
-import urllib
+import time
 
-from google.appengine.api import users
+import endpoints
+from protorpc import messages
+from protorpc import message_types
+from protorpc import remote
+
+from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
-import jinja2
-import webapp2
+from models import Profile
+from models import ProfileForm
 
-JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
-    extensions=['jinja2.ext.autoescape'],
-    autoescape=True)
-# [END imports]
+from settings import WEB_CLIENT_ID
 
-# [START handlers]
-class MainPage(webapp2.RequestHandler):
-    def get(self):
-        self.redirect('/login')
+EMAIL_SCOPE = endpoints.EMAIL_SCOPE
+API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
-class Login(webapp2.RequestHandler):
-    def get(self):
-        template_values = {
-            'user': 'xzy',
-            'greetings': 'abc',
-        }
-        template = JINJA_ENVIRONMENT.get_template('login.html')
-        self.response.write(template.render(template_values))
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-class SignUp(webapp2.RequestHandler):
-    def get(self):
-        template_values = {
-            'user': 'xzy',
-            'greetings': 'abc',
-        }
-        template = JINJA_ENVIRONMENT.get_template('signup.html')
-        self.response.write(template.render(template_values))
+@endpoints.api( name='tennis',
+				version='v1',
+				allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID],
+				scopes=[EMAIL_SCOPE])
+class TennisApi(remote.Service):
+	"""Tennis API v0.1"""
 
-class Dashboard(webapp2.RequestHandler):
-    def get(self):
-        template_values = {
-            'user': 'xzy',
-            'greetings': 'abc',
-        }
-        template = JINJA_ENVIRONMENT.get_template('dashboard.html')
-        self.response.write(template.render(template_values))
-# [END handlers]
+	def _copyProfileToForm(self, prof):
+		"""Copy relevant fields from Profile to ProfileForm."""
+		# copy relevant fields from Profile to ProfileForm
+		pf = ProfileForm()
+		for field in pf.all_fields():
+			if hasattr(prof, field.name):
+				setattr(pf, field.name, getattr(prof, field.name))
+		pf.check_initialized()
+		return pf
 
-# [START app]
-app = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/login', Login),
-    ('/signup', SignUp),
-    ('/dashboard', Dashboard),
-], debug=True)
-# [END app]
+	@endpoints.method(message_types.VoidMessage, ProfileForm,
+			path='dashboard', http_method='GET', name='getProfile')
+	def getProfile(self, request):
+		"""Return user profile."""
+		user = endpoints.get_current_user()
+		if not user:
+			raise endpoints.UnauthorizedException('Authorization required')
+
+		profile = Profile(
+			userId = 'user_id placeholder~~~',
+			displayName = user.nickname(),
+			mainEmail= user.email(),
+		)
+
+		return self._copyProfileToForm(profile)
+
+# registers API
+api = endpoints.api_server([TennisApi])
