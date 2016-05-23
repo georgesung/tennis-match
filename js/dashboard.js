@@ -10,10 +10,15 @@ function handleAuthResult(authResult) {
 	if (authResult && !authResult.error) {
 		gapi.client.tennis.getProfile().
 			execute(function (resp) {
-				console.log(resp.result.displayName);
-				console.log(resp.result.mainEmail);
+				//console.log(resp.result.displayName);
+				//console.log(resp.result.mainEmail);
+
+				var userEmail = resp.result.mainEmail;
+
+				$('#my-info').text('Your email is: ' + userEmail)
 			});
 	} else {
-		console.log('auth failed!');
+		// If user is not authorized, redirect to login page
+		window.location = '/login';
 	}
 }

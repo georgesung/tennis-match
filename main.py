@@ -47,6 +47,9 @@ class TennisApi(remote.Service):
 	def getProfile(self, request):
 		"""Return user profile."""
 		user = endpoints.get_current_user()
+
+		print user
+
 		if not user:
 			raise endpoints.UnauthorizedException('Authorization required')
 
