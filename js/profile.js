@@ -1,5 +1,24 @@
 'use strict';
 
+$('#update-profile').click(function() {
+	console.log('you clik!');
+
+	// FIXME: How do I pass a message from front-end to back-end???
+	var profile = {
+		'userId': 'aa',
+		'mainEmail': 'bb',
+		'firstName': 'Brute',
+		'lastName': 'Force',
+	};
+
+	gapi.client.tennis.updateProfile(profile).
+		execute(function(resp) {
+			console.log('yay!');
+		});
+});
+
+// Mandatory (?) Google API stuff?
+
 // Any Google API functionality must be executed -after- the gapi is loaded, thus it's placed in a callback
 function onGapiLoad() {
 	// Check Google OAuth
@@ -15,7 +34,7 @@ function handleAuthResult(authResult) {
 
 				var userEmail = resp.result.mainEmail;
 
-				$('#my-info').text('Your email is: ' + userEmail);
+				console.log('Your email is: ' + userEmail);
 			});
 	} else {
 		// If user is not authorized, redirect to login page

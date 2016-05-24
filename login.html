@@ -12,7 +12,7 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
 		<!-- For Google sign-in -->
-		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<!--script src="https://apis.google.com/js/platform.js" async defer></script-->
 		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com">
 
 		<!-- Google App Engine API -->
@@ -30,21 +30,20 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12">
-					<h1>Welcome! Please login, or create an account</h1>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-6">
-					<h2>Login with Facebook</h2>
-				</div>
-				<div class="col-md-6">
-					<h2>Login with Google+</h2>
-					<div class="g-signin2" data-onsuccess="onSignIn"></div>
+					<h2>Welcome! Please login, or create an account</h2>
+					<br/>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<h3>Login with TennisMatch account</h3>
+					<!--div class="g-signin2" data-onsuccess="onSignIn"></div-->
+					<div id="my-signin2"></div>
+					<br/>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<h4>Login with TennisMatch account</h4>
 				</div>
 			</div>
 			<div class="row">
@@ -66,9 +65,31 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<p><br/>Don't have an account? <a href="signup.html">Sign up here</a></p>
+					<p><br/>Don't have an account? <a href="signup">Sign up here</a></p>
 				</div>
 			</div>
 		</div>
+
+		<!-- More Google sign-in stuff -->
+		<script>
+			function onSuccess(googleUser) {
+				console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+			}
+			function onFailure(error) {
+				console.log(error);
+			}
+			function renderButton() {
+				gapi.signin2.render('my-signin2', {
+					'scope': 'profile email',
+					'width': 240,
+					'height': 50,
+					'longtitle': true,
+					'theme': 'dark',
+					'onsuccess': onSuccess,
+					'onfailure': onFailure
+				});
+			}
+		</script>
+		<script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
 	</body>
 </html>

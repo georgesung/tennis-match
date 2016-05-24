@@ -48,16 +48,42 @@ class TennisApi(remote.Service):
 		"""Return user profile."""
 		user = endpoints.get_current_user()
 
-		print user
-
 		if not user:
 			raise endpoints.UnauthorizedException('Authorization required')
 
 		profile = Profile(
 			userId = 'user_id placeholder~~~',
-			displayName = user.nickname(),
+			#displayName = user.nickname(),
 			mainEmail= user.email(),
+			firstName = "Brute",
+			lastName = "Force",
 		)
+
+		return self._copyProfileToForm(profile)
+
+	@endpoints.method(ProfileForm, ProfileForm,
+			path='dashboard', http_method='POST', name='updateProfile')
+	def updateProfile(self, request):
+		"""Update user profile."""
+
+		# Ensure authentication
+		user = endpoints.get_current_user()
+		if not user:
+			raise endpoints.UnauthorizedException('Authorization required')
+		#profile = self._getProfileFromUser()
+
+		# Make sure the incoming message is initialized, raise exception if not
+		request.check_initialized()
+
+		# FIXME: Somehow I can't print to my GAE console, let's try again in Mac
+		profile = Profile()
+		for field in request.all_fields():
+			print "hahahahaa"
+			print dir(field)
+			#print getattr(request, field)
+			#profile.field = getattr(request, field)
+
+		print 'First name: ' + getattr(request, 'firstName')
 
 		return self._copyProfileToForm(profile)
 

@@ -24,6 +24,16 @@ handlers:
   upload: login\.html
   secure: always
 
+- url: /signup
+  static_files: signup.html
+  upload: signup\.html
+  secure: always
+
+- url: /profile
+  static_files: profile.html
+  upload: profile\.html
+  secure: always
+
 - url: /_ah/spi/.*
   script: main.api
   secure: always
