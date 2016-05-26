@@ -1,23 +1,24 @@
 'use strict';
 
-$('#update-profile').click(function() {
-	console.log('you clik!');
+// Note userId == email
 
-	// FIXME: How do I pass a message from front-end to back-end???
+$('#update-profile').click(function() {
+	var userId = $('#email-address').val();
+	var firstName = $('#first-name').val();
+	var lastName = $('#last-name').val();
+
 	var profile = {
-		'userId': 'aa',
-		'mainEmail': 'bb',
-		'firstName': 'Brute',
-		'lastName': 'Force',
+		'userId': userId,
+		'firstName': firstName,
+		'lastName': lastName,
 	};
 
+	//gapi.client.tennis.updateProfile(profile).execute();
 	gapi.client.tennis.updateProfile(profile).
 		execute(function(resp) {
-			console.log('yay!');
+			console.log('FIXME TODO: Please implement redirect');
 		});
 });
-
-// Mandatory (?) Google API stuff?
 
 // Any Google API functionality must be executed -after- the gapi is loaded, thus it's placed in a callback
 function onGapiLoad() {
@@ -27,14 +28,12 @@ function onGapiLoad() {
 
 function handleAuthResult(authResult) {
 	if (authResult && !authResult.error) {
+		// If user is authorized, populate fields with user profile info
 		gapi.client.tennis.getProfile().
 			execute(function(resp) {
-				//console.log(resp.result.displayName);
-				//console.log(resp.result.mainEmail);
-
-				var userEmail = resp.result.mainEmail;
-
-				console.log('Your email is: ' + userEmail);
+				$('#email-address').val(resp.result.userId);
+				$('#first-name').val(resp.result.firstName);
+				$('#last-name').val(resp.result.lastName);
 			});
 	} else {
 		// If user is not authorized, redirect to login page

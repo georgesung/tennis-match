@@ -34,7 +34,6 @@ class TennisApi(remote.Service):
 
 	def _copyProfileToForm(self, prof):
 		"""Copy relevant fields from Profile to ProfileForm."""
-		# copy relevant fields from Profile to ProfileForm
 		pf = ProfileForm()
 		for field in pf.all_fields():
 			if hasattr(prof, field.name):
@@ -43,7 +42,7 @@ class TennisApi(remote.Service):
 		return pf
 
 	@endpoints.method(message_types.VoidMessage, ProfileForm,
-			path='dashboard', http_method='GET', name='getProfile')
+			path='', http_method='GET', name='getProfile')
 	def getProfile(self, request):
 		"""Return user profile."""
 		user = endpoints.get_current_user()
@@ -51,18 +50,26 @@ class TennisApi(remote.Service):
 		if not user:
 			raise endpoints.UnauthorizedException('Authorization required')
 
-		profile = Profile(
-			userId = 'user_id placeholder~~~',
-			#displayName = user.nickname(),
-			mainEmail= user.email(),
-			firstName = "Brute",
-			lastName = "Force",
-		)
+		# Create new ndb key based on unique user ID (email)
+		# Get profile from datastore -- if profile not found, then profile=None
+		profile_key = ndb.Key(Profile, user.email())
+		profile = profile_key.get()
+
+		# Create placeholder empty profile if user does not have one, and put it in datastore
+		if not profile:
+			profile = Profile(
+				key = profile_key,
+				userId = user.email(),
+				firstName = '',
+				lastName = '',
+			)
+
+			profile.put()
 
 		return self._copyProfileToForm(profile)
 
 	@endpoints.method(ProfileForm, ProfileForm,
-			path='dashboard', http_method='POST', name='updateProfile')
+			path='', http_method='POST', name='updateProfile')
 	def updateProfile(self, request):
 		"""Update user profile."""
 
@@ -70,20 +77,23 @@ class TennisApi(remote.Service):
 		user = endpoints.get_current_user()
 		if not user:
 			raise endpoints.UnauthorizedException('Authorization required')
-		#profile = self._getProfileFromUser()
 
 		# Make sure the incoming message is initialized, raise exception if not
 		request.check_initialized()
 
-		# FIXME: Somehow I can't print to my GAE console, let's try again in Mac
-		profile = Profile()
-		for field in request.all_fields():
-			print "hahahahaa"
-			print dir(field)
-			#print getattr(request, field)
-			#profile.field = getattr(request, field)
+		# Get existing profile from datastore
+		profile_key = ndb.Key(Profile, user.email())
+		profile = profile_key.get()
 
-		print 'First name: ' + getattr(request, 'firstName')
+		# Update profile object from the user's form
+		for field in request.all_fields():
+			if field.name == 'userId':
+				setattr(profile, 'userId', user.email())
+			else:
+				setattr(profile, field.name, str(getattr(request, field.name)))
+
+		# Save updated profile to datastore
+		profile.put()
 
 		return self._copyProfileToForm(profile)
 
