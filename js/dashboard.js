@@ -10,10 +10,9 @@ function handleAuthResult(authResult) {
 	if (authResult && !authResult.error) {
 		gapi.client.tennis.getProfile().
 			execute(function(resp) {
-				//console.log(resp.result.displayName);
-				//console.log(resp.result.mainEmail);
+				console.log(resp.result.userId);
 
-				var userEmail = resp.result.mainEmail;
+				var userEmail = resp.result.userId;
 
 				$('#my-info').text('Your email is: ' + userEmail);
 			});

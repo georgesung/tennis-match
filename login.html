@@ -12,7 +12,7 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
 		<!-- For Google sign-in -->
-		<!--script src="https://apis.google.com/js/platform.js" async defer></script-->
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
 		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com">
 
 		<!-- Google App Engine API -->
@@ -37,7 +37,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<!--div class="g-signin2" data-onsuccess="onSignIn"></div-->
-					<div id="my-signin2"></div>
+					<div id="my-signin2" data-onsuccess="onSignIn"></div>
 					<br/>
 				</div>
 			</div>
@@ -80,7 +80,7 @@
 			}
 			function renderButton() {
 				gapi.signin2.render('my-signin2', {
-					'scope': 'profile email',
+					'scope': 'email profile',
 					'width': 240,
 					'height': 50,
 					'longtitle': true,
