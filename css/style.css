@@ -1,0 +1,11 @@
+body {
+	margin-top: 10px;
+}
+
+.match-info {
+	margin: 5px 0px 5px 0px;
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: lightgray;
+}

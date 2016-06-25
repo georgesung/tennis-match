@@ -30,7 +30,7 @@ API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 				allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID],
 				scopes=[EMAIL_SCOPE])
 class TennisApi(remote.Service):
-	"""Tennis API v0.1"""
+	"""Tennis API"""
 
 	def _copyProfileToForm(self, prof):
 		"""Copy relevant fields from Profile to ProfileForm."""

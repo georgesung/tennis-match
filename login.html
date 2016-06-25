@@ -17,12 +17,15 @@
 
 		<!-- Google App Engine API -->
 		<script>
-		function init() {
-			gapi.client.load('tennis', 'v1', null, '//' + window.location.host + '/_ah/api');
-			gapi.client.load('oauth2', 'v2', null);
-		};
+			function init() {
+				gapi.client.load('tennis', 'v1', null, '//' + window.location.host + '/_ah/api');
+				gapi.client.load('oauth2', 'v2', null);
+			};
 		</script>
 		<script src="https://apis.google.com/js/client.js?onload=init"></script>
+
+		<!-- My own css -->
+		<link rel="stylesheet" type="text/css" href="/css/style.css">
 
 		<title>Login</title>
 	</head>

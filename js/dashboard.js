@@ -12,9 +12,9 @@ function handleAuthResult(authResult) {
 			execute(function(resp) {
 				console.log(resp.result.userId);
 
-				var userEmail = resp.result.userId;
+				var userId = resp.result.userId;
 
-				$('#my-info').text('Your email is: ' + userEmail);
+				$('#greeting').text('Welcome, ' + userId);
 			});
 	} else {
 		// If user is not authorized, redirect to login page

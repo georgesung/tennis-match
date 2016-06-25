@@ -17,23 +17,142 @@
 
 		<!-- Google App Engine API -->
 		<script>
-			function init() {
-				gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
-				gapi.client.load('oauth2', 'v2', null);
-			};
+		function init() {
+			gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
+			gapi.client.load('oauth2', 'v2', null);
+		};
 		</script>
 		<script src="https://apis.google.com/js/client.js?onload=init"></script>
+
+		<!-- My own css -->
+		<link rel="stylesheet" type="text/css" href="/css/style.css">
 
 		<title>Dashboard</title>
 	</head>
 	<body>
 		<div class="container">
+
 			<div class="row">
-				<div class="col-md-12">
-					<h1>Hello generic one!</h1>
-					<p id='my-info'></p>
+				<div class="col-xs-6">
+					<i><small id="greeting"></small></i>
+				</div>
+				<div class="col-xs-6 text-right">
+					<div class="btn-group">
+						<button type="button" class="btn btn-primary btn-sm">Request Match</button>
+						<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="caret"></span>
+							<span class="sr-only">Toggle Dropdown</span>
+						</button>
+						  <ul class="dropdown-menu pull-right">
+							<li><a href="#">My Profile</a></li>
+							<li><a href="#">FAQ</a></li>
+							<li role="separator" class="divider"></li>
+							<li><a href="#">Log Out</a></li>
+						</ul>
+					</div>
 				</div>
 			</div>
+
+			<div class="row"><div class="col-md-12">
+				<h5>Confirmed Matches</h5>
+				<div class="row match-info">
+					<div class="col-sm-4">
+						<div>Brute Force</div>
+					</div>
+					<div class="col-sm-4">
+						<div>BF Dr., Waltham MA</div>
+					</div>
+					<div class="col-sm-4">
+						<div>Jun. 22, 2016 - 4:00 PM</div>
+					</div>
+				</div>
+				<div class="row match-info">
+					<div class="col-sm-4">
+						<div>Veerapat Wonjongnivat</div>
+					</div>
+					<div class="col-sm-4">
+						<div>MIT Courts, Cambridge MA</div>
+					</div>
+					<div class="col-sm-4">
+						<div>Jun. 23, 2016 - 2:00 AM</div>
+					</div>
+				</div>
+			</div></div>
+
+			<div class="row"><div class="col-md-12">
+				<h5>Pending Matches</h5>
+				<div class="row match-info">
+					<div class="col-sm-4">
+						<div>Roger Federer</div>
+					</div>
+					<div class="col-sm-4">
+						<div>BF Dr., Waltham MA</div>
+					</div>
+					<div class="col-sm-4">
+						<div>Jun. 22, 2016 - 4:00 PM</div>
+					</div>
+				</div>
+				<div class="row match-info">
+					<div class="col-sm-4">
+						<i>Request sent, 12 interested</i>
+					</div>
+					<div class="col-sm-4">
+						<div>MIT Courts, Cambridge MA</div>
+					</div>
+					<div class="col-sm-4">
+						<div>Jun. 23, 2016 - 2:00 AM</div>
+					</div>
+				</div>
+			</div></div>
+
+			<div class="row"><div class="col-md-12">
+				<h5>Available Matches</h5>
+				<div class="row match-info">
+					<div class="col-sm-4">
+						<div>Brute Force</div>
+					</div>
+					<div class="col-sm-4">
+						<div>BF Dr., Waltham MA</div>
+					</div>
+					<div class="col-sm-4">
+						<div>Jun. 22, 2016 - 4:00 PM</div>
+					</div>
+				</div>
+				<div class="row match-info">
+					<div class="col-sm-4">
+						<div>Veerapat Wonjongnivat</div>
+					</div>
+					<div class="col-sm-4">
+						<div>MIT Courts, Cambridge MA</div>
+					</div>
+					<div class="col-sm-4">
+						<div>Jun. 23, 2016 - 2:00 AM</div>
+					</div>
+				</div>
+				<div class="row match-info">
+					<div class="col-sm-4">
+						<div>Brute Force</div>
+					</div>
+					<div class="col-sm-4">
+						<div>BF Dr., Waltham MA</div>
+					</div>
+					<div class="col-sm-4">
+						<div>Jun. 22, 2016 - 4:00 PM</div>
+					</div>
+				</div>
+				<div class="row match-info">
+					<div class="col-sm-4">
+						<div>Veerapat Wonjongnivat</div>
+					</div>
+					<div class="col-sm-4">
+						<div>MIT Courts, Cambridge MA</div>
+					</div>
+					<div class="col-sm-4">
+						<div>Jun. 23, 2016 - 2:00 AM</div>
+					</div>
+				</div>
+			</div></div>
+
 		</div>
 
 		<script src="/js/settings.js"></script>
