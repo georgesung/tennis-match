@@ -37,6 +37,11 @@ handlers:
   upload: profile\.html
   secure: always
 
+- url: /req_match
+  static_files: req_match.html
+  upload: req_match\.html
+  secure: always
+
 - url: /_ah/spi/.*
   script: main.api
   secure: always
