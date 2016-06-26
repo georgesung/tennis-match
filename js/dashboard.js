@@ -10,8 +10,6 @@ function handleAuthResult(authResult) {
 	if (authResult && !authResult.error) {
 		gapi.client.tennis.getProfile().
 			execute(function(resp) {
-				console.log(resp.result.userId);
-
 				var userId = resp.result.userId;
 
 				$('#greeting').text('Welcome, ' + userId);
