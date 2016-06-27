@@ -41,6 +41,7 @@
 					<h4>Request Match</h4>
 				</div>
 			</div>
+
 			<div class="row">
 				<div class="col-sm-12" id="form-container">
 					<form onsubmit="return false">
@@ -76,28 +77,22 @@
 
 						<fieldset class="form-group">
 							<label>Location</label>
-							<input type="text" class="form-control" id="location" placeholder="(Google map loc input widget)">
+							<input id="pac-input" class="form-control" type="text" placeholder="Search Location">
 						</fieldset>
-
-						<i>Can I put Google Map inside my form? Or outside? Does it matter?</i>
 					</form>
-
 				</div>
 			</div>
 
-
 			<div class="row">
 				<div class="col-sm-12">
-				blah
-
-
-
-			</div></div>
-
+					<div id="map" style="height:250px;"></div>
+				</div>
+			</div>
 
 		</div>
 
 		<script src="/js/settings.js"></script>
-		<!--script src="/js/profile.js"></script-->
+		<script src="/js/req_match.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCUsuwqOFhS4JIbW9UQms70I7YngynTyS8&libraries=places&callback=initAutocomplete" async defer></script>
 	</body>
 </html>
