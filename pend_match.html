@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- Include jQuery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+		<!-- Using Bootstrap CDN to include Bootstrap -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+		<!-- TEMP, copy over API stuff from dashboard.html -->
+
+		<!-- My own css -->
+		<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+		<!-- Date picker: https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap-datepicker3.min.css">
+		<script type="text/javascript" src="/js/bootstrap-datepicker.min.js"></script>
+
+		<!-- Clock picker: http://weareoutman.github.io/clockpicker/ -->
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap-clockpicker.min.css">
+		<script type="text/javascript" src="/js/bootstrap-clockpicker.min.js"></script>
+
+		<title>Pending Match</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-6">
+					<button type="button" class="btn btn-default btn-sm">Back</button>
+				</div>
+				<div class="col-xs-6 text-right">
+					<button type="button" class="btn btn-danger btn-sm">Cancel Request</button>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-12">
+					<h4>Pending Match</h4>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-sm-12" id="form-container">
+					<form onsubmit="return false">
+
+						<fieldset class="form-group">
+							<label>Date</label>
+							<input type="text" class="form-control" placeholder="Sunday, Jan 25 1987" readonly>
+						</fieldset>
+
+						<fieldset class="form-group">
+							<label>Time</label>
+							<input type="text" class="form-control" placeholder="19:30" readonly>
+						</fieldset>
+
+						<fieldset class="form-group">
+							<label>Location</label>
+							<input id="pac-input" class="form-control" type="text" placeholder="Some location here!" readonly>
+						</fieldset>
+					</form>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-sm-12">
+					<div id="map" style="height:250px;"></div>
+				</div>
+			</div>
+
+		</div>
+
+		<script src="/js/settings.js"></script>
+		<script src="/js/pend_match.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCUsuwqOFhS4JIbW9UQms70I7YngynTyS8&libraries=places&callback=initAutocomplete" async defer></script>
+	</body>
+</html>
