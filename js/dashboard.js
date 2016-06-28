@@ -19,3 +19,20 @@ function handleAuthResult(authResult) {
 		window.location = '/login';
 	}
 }
+
+// On-click handlers
+$('#req-button').click(function() {
+	window.location.href = '/req_match';
+});
+
+$('.conf-match').click(function() {
+	window.location.href = '/conf_match';
+});
+
+$('.pend-match').click(function() {
+	window.location.href = '/pend_match';
+});
+
+$('.avail-match').click(function() {
+	window.location.href = '/avail_match';
+});

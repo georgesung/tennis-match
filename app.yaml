@@ -42,6 +42,11 @@ handlers:
   upload: req_match\.html
   secure: always
 
+- url: /conf_match
+  static_files: conf_match.html
+  upload: conf_match\.html
+  secure: always
+
 - url: /pend_match
   static_files: pend_match.html
   upload: pend_match\.html

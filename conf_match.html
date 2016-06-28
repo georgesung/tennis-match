@@ -24,21 +24,18 @@
 		<link rel="stylesheet" type="text/css" href="/css/bootstrap-clockpicker.min.css">
 		<script type="text/javascript" src="/js/bootstrap-clockpicker.min.js"></script>
 
-		<title>Request Match</title>
+		<title>Confirmed Match</title>
 	</head>
 	<body>
 		<div class="container">
 			<div class="row">
-				<div class="col-xs-6">
+				<div class="col-xs-12">
 					<button type="button" class="btn btn-default btn-sm" id="back-button">Back</button>
-				</div>
-				<div class="col-xs-6 text-right">
-					<button type="button" class="btn btn-primary btn-sm" id="req-button">Make Request</button>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-sm-12">
-					<h4>Request Match</h4>
+					<h4>Confirmed Match</h4>
 				</div>
 			</div>
 
@@ -47,37 +44,23 @@
 					<form onsubmit="return false">
 
 						<fieldset class="form-group">
-							<label>Date</label>
-							<div class="input-group date">
-								<input type="text" class="form-control" placeholder="mm/dd/yyyy">
-								<span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
-							</div>
+							<label>Name (NTRP/Gender)</label>
+							<input type="text" class="form-control" placeholder="George Sung cutofflongname... (4.25/M)" readonly>
+						</fieldset>
 
-							<script type="text/javascript">
-							$('#form-container .input-group.date').datepicker({
-								autoclose: true,
-								todayHighlight: true
-							});
-							</script>
+						<fieldset class="form-group">
+							<label>Date</label>
+							<input type="text" class="form-control" placeholder="Sundayyyy, Jan 25 1987" readonly>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>Time</label>
-							<div class="input-group clockpicker" data-autoclose="true">
-								<input type="text" class="form-control" placeholder="hh:mm">
-								<span class="input-group-addon">
-									<span class="glyphicon glyphicon-time"></span>
-								</span>
-							</div>
-
-							<script type="text/javascript">
-							$('.clockpicker').clockpicker();
-							</script>
+							<input type="text" class="form-control" placeholder="19:30" readonly>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>Location</label>
-							<input id="pac-input" class="form-control" type="text" placeholder="Search Location">
+							<input id="pac-input" class="form-control" type="text" placeholder="Some location here!" readonly>
 						</fieldset>
 					</form>
 				</div>
@@ -92,7 +75,7 @@
 		</div>
 
 		<script src="/js/settings.js"></script>
-		<script src="/js/req_match.js"></script>
+		<script src="/js/conf_match.js"></script>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCUsuwqOFhS4JIbW9UQms70I7YngynTyS8&libraries=places&callback=initAutocomplete" async defer></script>
 	</body>
 </html>

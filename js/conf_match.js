@@ -61,7 +61,3 @@ function initAutocomplete() {
 $('#back-button').click(function() {
 	window.location.href = '/dashboard';
 });
-
-$('#cancel-button').click(function() {
-	alert('TODO!');
-});

@@ -56,3 +56,12 @@ function initAutocomplete() {
 		map.setZoom(15);
 	});
 }
+
+// On-click handlers
+$('#back-button').click(function() {
+	window.location.href = '/dashboard';
+});
+
+$('#play-button').click(function() {
+	alert('TODO!');
+});

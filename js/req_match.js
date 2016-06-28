@@ -1,6 +1,6 @@
+// Code for Google Maps API and Google Places Search
 // Code below based on:
 // https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
-
 function initAutocomplete() {
 	var map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 42.355137, lng: -71.065604},
@@ -56,3 +56,12 @@ function initAutocomplete() {
 		map.setZoom(15);
 	});
 }
+
+// On-click handlers
+$('#back-button').click(function() {
+	window.location.href = '/dashboard';
+});
+
+$('#req-button').click(function() {
+	alert('TODO!');
+});
