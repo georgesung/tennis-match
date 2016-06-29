@@ -17,12 +17,19 @@
 
 		<!-- Google App Engine API -->
 		<script>
-			function init() {
-				gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
-				gapi.client.load('oauth2', 'v2', null);
-			};
+		function init() {
+			gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
+			gapi.client.load('oauth2', 'v2', null);
+		};
 		</script>
 		<script src="https://apis.google.com/js/client.js?onload=init"></script>
+
+		<!-- My own css -->
+		<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+		<!-- Slider UI (https://github.com/seiyria/bootstrap-slider) -->
+		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/bootstrap-slider.min.js"></script>
 
 		<title>Create/Update Profile</title>
 	</head>
@@ -30,12 +37,7 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12">
-					<h1>Create/Update Profile</h1>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<h3>Please enter you details</h3>
+					<h4>Create/Update Profile</h4>
 				</div>
 			</div>
 			<div class="row">
@@ -43,8 +45,13 @@
 					<form onsubmit="return false">
 
 						<fieldset class="form-group">
-							<label>Email Address</label>
-							<input type="email" class="form-control" id="email-address" placeholder="Email" readonly>
+							<label>Account Email</label>
+							<input type="email" class="form-control" id="account-email" placeholder="Email" readonly>
+						</fieldset>
+
+						<fieldset class="form-group">
+							<label> Contact Email</label> <span><sm><i> (if different from above)</i></sm></span>
+							<input type="email" class="form-control" id="contact-email" placeholder="Email">
 						</fieldset>
 
 						<fieldset class="form-group">
@@ -56,6 +63,27 @@
 							<label>Last Name</label>
 							<input type="text" class="form-control" id="last-name" placeholder="Last Name">
 						</fieldset>
+
+						<fieldset class="form-group">
+							<label>Gender</label>
+							<select class="form-control" id="gender">
+								<option value="m">M</option>
+								<option value="f">F</option>
+							</select>
+						</fieldset>
+
+						<fieldset class="form-group">
+							<label>NTRP Rating</label>
+							<br>
+							<input id="ntrp-rating" type="text"
+								data-provide="slider"
+								data-slider-ticks="[2.5, 3.0, 3.5, 4.0, 4.50, 5.0]"
+								data-slider-ticks-labels='["2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]'
+								data-slider-step="0.5"
+								data-slider-value="3.5"
+								data-slider-selection="none"
+								data-slider-tooltip="hide" />
+ 						</fieldset>
 
 						<button type="submit" class="btn btn-primary" id="update-profile">Create/Update Profile</button>
 					</form>

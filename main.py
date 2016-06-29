@@ -50,8 +50,6 @@ class TennisApi(remote.Service):
 		if not user:
 			raise endpoints.UnauthorizedException('Authorization required')
 
-		print('gsung: user.email() = ' + user.email())  # DEBUG
-
 		# Create new ndb key based on unique user ID (email)
 		# Get profile from datastore -- if profile not found, then profile=None
 		profile_key = ndb.Key(Profile, user.email())
@@ -62,8 +60,7 @@ class TennisApi(remote.Service):
 			profile = Profile(
 				key = profile_key,
 				userId = user.email(),
-				firstName = '',
-				lastName = '',
+				contactEmail = user.email(),
 			)
 
 			profile.put()
@@ -92,7 +89,8 @@ class TennisApi(remote.Service):
 			if field.name == 'userId':
 				setattr(profile, 'userId', user.email())
 			else:
-				setattr(profile, field.name, str(getattr(request, field.name)))
+				#setattr(profile, field.name, str(getattr(request, field.name)))
+				setattr(profile, field.name, getattr(request, field.name))
 
 		# Save updated profile to datastore
 		profile.put()
