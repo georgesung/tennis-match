@@ -27,6 +27,10 @@
 		<!-- My own css -->
 		<link rel="stylesheet" type="text/css" href="/css/style.css">
 
+		<!-- Bootstrap Toggle button: http://www.bootstraptoggle.com -->
+		<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+		<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
 		<title>Dashboard</title>
 	</head>
 	<body>
@@ -54,11 +58,14 @@
 				</div>
 			</div>
 
-			<div class="row"><div class="col-sm-12">
-				<i><small>* = doubles<br>
-				Click/touch match for more details</small></i>
-			</div></div>
-<!-- TODO: Color-code singles/doubles? Way too cluttered now -->
+			<div class="row">
+				<div class="col-sm-12">
+				<i><small>Select singles/doubles:</small></i><br>
+				<input type="checkbox" data-toggle="toggle" data-on="Doubles" data-off="Singles"
+					data-onstyle="info" data-offstyle="info" data-size="mini">
+				</div>
+			</div>
+
 			<div class="row"><div class="col-sm-12">
 				<h5><b>Confirmed Matches</b></h5>
 				<div class="row match-info conf-match">
@@ -88,24 +95,18 @@
 			<div class="row"><div class="col-sm-12">
 				<h5><b>Pending Matches</b></h5>
 				<div class="row match-info pend-match">
-					<div class="col-sm-4">
-						<div><i>Singles</i></div>
-					</div>
-					<div class="col-sm-4">
+					<div class="col-sm-6">
 						<div>BF Dr., Waltham MA</div>
 					</div>
-					<div class="col-sm-4">
+					<div class="col-sm-6">
 						<div>Jun. 22, 2016 - 4:00 PM</div>
 					</div>
 				</div>
 				<div class="row match-info pend-match">
-					<div class="col-sm-4">
-						<div><i>Doubles, looking for 3 players</i></div>
-					</div>
-					<div class="col-sm-4">
+					<div class="col-sm-6">
 						<div>MIT Courts, Cambridge MA</div>
 					</div>
-					<div class="col-sm-4">
+					<div class="col-sm-6">
 						<div>Jun. 23, 2016 - 2:00 AM</div>
 					</div>
 				</div>
@@ -126,7 +127,7 @@
 				</div>
 				<div class="row match-info">
 					<div class="col-sm-4 avail-match">
-						<div>* Veerapat Wonjongnivat <i>(looking for 2 players)</i></div>
+						<div>Veerapat Wonjongnivat</div>
 					</div>
 					<div class="col-sm-4">
 						<div>MIT Courts, Cambridge MA</div>
@@ -137,7 +138,7 @@
 				</div>
 				<div class="row match-info avail-match">
 					<div class="col-sm-4">
-						<div>* Brute Force <i>(looking for 1 player)</i></div>
+						<div>Brute Force</div>
 					</div>
 					<div class="col-sm-4">
 						<div>BF Dr., Waltham MA</div>
