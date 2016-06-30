@@ -61,3 +61,25 @@ function initAutocomplete() {
 $('#back-button').click(function() {
 	window.location.href = '/dashboard';
 });
+
+$('#cancel-button').click(function() {
+	bootbox.dialog({
+		message: "Are you sure? WARNING: Last-minute cancellations result in bad karma!",
+		buttons: {
+			yes: {
+				label: "Yes",
+				className: "btn-primary",
+				callback: function() {
+					console.log("yes!");
+				}
+			},
+			no: {
+				label: "No",
+				className: "btn-default",
+				callback: function() {
+					console.log("no~");
+				}
+			}
+		}
+	});
+});

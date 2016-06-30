@@ -63,5 +63,23 @@ $('#back-button').click(function() {
 });
 
 $('#cancel-button').click(function() {
-	alert('TODO!');
+	bootbox.dialog({
+		message: "Are you sure?",
+		buttons: {
+			yes: {
+				label: "Yes",
+				className: "btn-primary",
+				callback: function() {
+					console.log("yes!");
+				}
+			},
+			no: {
+				label: "No",
+				className: "btn-default",
+				callback: function() {
+					console.log("no~");
+				}
+			}
+		}
+	});
 });

@@ -16,21 +16,19 @@
 		<!-- My own css -->
 		<link rel="stylesheet" type="text/css" href="/css/style.css">
 
-		<!-- Date picker: https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
-		<link rel="stylesheet" type="text/css" href="/css/bootstrap-datepicker3.min.css">
-		<script type="text/javascript" src="/js/bootstrap-datepicker.min.js"></script>
-
-		<!-- Clock picker: http://weareoutman.github.io/clockpicker/ -->
-		<link rel="stylesheet" type="text/css" href="/css/bootstrap-clockpicker.min.css">
-		<script type="text/javascript" src="/js/bootstrap-clockpicker.min.js"></script>
+		<!-- Bootbox: http://bootboxjs.com -->
+		<script src="/js/bootbox.min.js"></script>
 
 		<title>Confirmed Match</title>
 	</head>
 	<body>
 		<div class="container">
 			<div class="row">
-				<div class="col-xs-12">
+				<div class="col-xs-6">
 					<button type="button" class="btn btn-default btn-sm" id="back-button">Back</button>
+				</div>
+				<div class="col-xs-6 text-right">
+					<button type="button" class="btn btn-danger btn-sm" id="cancel-button">Cancel Match</button>
 				</div>
 			</div>
 			<div class="row">
