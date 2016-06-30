@@ -28,21 +28,21 @@
 		<link rel="stylesheet" type="text/css" href="/css/style.css">
 
 		<!-- Slider UI (https://github.com/seiyria/bootstrap-slider) -->
-		<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/css/bootstrap-slider.min.css">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/7.1.0/bootstrap-slider.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap-slider.min.css">
+		<script src="/js/bootstrap-slider.min.js"></script>
 
-		<title>Create/Update Profile</title>
+		<title>Update Profile</title>
 	</head>
 	<body>
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12">
-					<h4>Create/Update Profile</h4>
+					<h4>Update Profile</h4>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<form onsubmit="return false">
+					<form id="profile-form" onsubmit="return false">
 
 						<fieldset class="form-group">
 							<label>Account Email</label>
@@ -50,18 +50,18 @@
 						</fieldset>
 
 						<fieldset class="form-group">
-							<label> Contact Email</label> <span><sm><i> (if different from above)</i></sm></span>
-							<input type="email" class="form-control" id="contact-email" placeholder="Email">
+							<label> Contact Email</label>
+							<input type="email" class="form-control" id="contact-email" name="email" placeholder="Email" required>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>First Name</label>
-							<input type="text" class="form-control" id="first-name" placeholder="First Name">
+							<input type="text" class="form-control" id="first-name" name="firstName" placeholder="First Name" required>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>Last Name</label>
-							<input type="text" class="form-control" id="last-name" placeholder="Last Name">
+							<input type="text" class="form-control" id="last-name" name="lastName" placeholder="Last Name" required>
 						</fieldset>
 
 						<fieldset class="form-group">
@@ -85,12 +85,14 @@
 								data-slider-tooltip="hide" />
  						</fieldset>
 
-						<button type="submit" class="btn btn-primary" id="update-profile">Create/Update Profile</button>
+						<button type="submit" class="btn btn-primary" id="update-profile">Update Profile</button>
+						<button type="button" class="btn btn-default" id="cancel">Cancel</button>
 					</form>
 				</div>
 			</div>
 		</div>
 
+		<script src="/js/jquery.validate.min.js"></script>
 		<script src="/js/settings.js"></script>
 		<script src="/js/profile.js"></script>
 	</body>

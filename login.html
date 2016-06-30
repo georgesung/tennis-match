@@ -33,66 +33,25 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12">
-					<h2>Welcome! Please login, or create an account</h2>
+					<h2>Welcome!</h2>
 					<br/>
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<!--div class="g-signin2" data-onsuccess="onSignIn"></div-->
+					<h4>Please sign-in with your Google account, or create a new one</h4>
+					<br/>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
 					<div id="my-signin2" data-onsuccess="onSignIn"></div>
 					<br/>
 				</div>
 			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<h4>Login with TennisMatch account</h4>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<form>
-						<fieldset class="form-group">
-							<label>Email address</label>
-							<input type="email" class="form-control" id="emailAddress" placeholder="Email">
-						</fieldset>
-
-						<fieldset class="form-group">
-							<label>Password</label>
-							<input type="password" class="form-control" id="password" placeholder="Password">
-						</fieldset>
-
-						<button type="submit" class="btn btn-primary">Login</button>
-					</form>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<p><br/>Don't have an account? <a href="signup">Sign up here</a></p>
-				</div>
-			</div>
 		</div>
 
-		<!-- More Google sign-in stuff -->
-		<script>
-			function onSuccess(googleUser) {
-				console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
-			}
-			function onFailure(error) {
-				console.log(error);
-			}
-			function renderButton() {
-				gapi.signin2.render('my-signin2', {
-					'scope': 'email profile',
-					'width': 240,
-					'height': 50,
-					'longtitle': true,
-					'theme': 'dark',
-					'onsuccess': onSuccess,
-					'onfailure': onFailure
-				});
-			}
-		</script>
+		<script src="/js/login.js"></script>
 		<script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
 	</body>
 </html>

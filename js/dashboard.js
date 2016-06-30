@@ -12,7 +12,13 @@ function handleAuthResult(authResult) {
 			execute(function(resp) {
 				var userId = resp.result.userId;
 
-				$('#greeting').text('Welcome, ' + userId);
+				// If user has not created a profile, redirect to profile page
+				// Else, stay here
+				if (resp.result.firstName == '' || resp.result.lastName == '') {
+					window.location.href = '/profile';
+				} else {
+					$('#greeting').text('Welcome, ' + userId);
+				}
 			});
 	} else {
 		// If user is not authorized, redirect to login page

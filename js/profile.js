@@ -25,8 +25,26 @@ function handleAuthResult(authResult) {
 	}
 }
 
-// Read the input from front-end and communicate it to back-end
-$('#update-profile').click(function() {
+// Validate the form, set up form submit handler (function called when submit-type button is pressed)
+$('#profile-form').validate({
+	rules: {
+		firstName: 'required',
+		lastName:  'required',
+		email: {
+			required: true,
+			email: true
+		}
+	},
+	messages: {
+		firstName: 'Please enter your first name',
+		lastName:  'Please enter your last name',
+		email:     'Please enter a valid email address'
+	},
+	submitHandler: submitHandler,
+});
+
+function submitHandler() {
+	// Read values from form
 	var contactEmail  = $('#contact-email').val();
 	var firstName     = $('#first-name').val();
 	var lastName      = $('#last-name').val();
@@ -45,6 +63,11 @@ $('#update-profile').click(function() {
 	//gapi.client.tennis.updateProfile(profile).execute();
 	gapi.client.tennis.updateProfile(profile).
 		execute(function(resp) {
-			console.log('FIXME TODO: Please implement redirect');
+			window.location.href = '/dashboard';
 		});
+}
+
+// Cancel button redirects to dashboard, and discards changes
+$('#cancel').click(function() {
+	window.location.href = '/dashboard';
 });
