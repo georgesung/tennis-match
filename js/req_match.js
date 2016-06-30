@@ -64,7 +64,7 @@ $('#back-button').click(function() {
 
 $('#req-button').click(function() {
 	bootbox.dialog({
-		message: "Are you sure?",
+		message: "FIXME: Are you sure I need this dialog? Too much friction!",
 		buttons: {
 			yes: {
 				label: "Yes",
