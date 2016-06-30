@@ -17,7 +17,7 @@ function handleAuthResult(authResult) {
 				if (resp.result.firstName == '' || resp.result.lastName == '') {
 					window.location.href = '/profile';
 				} else {
-					$('#greeting').text('Welcome, ' + userId);
+					$('#greeting').text('Welcome, ' + resp.result.firstName);
 				}
 			});
 	} else {
