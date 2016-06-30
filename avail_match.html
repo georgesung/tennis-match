@@ -38,7 +38,7 @@
 			</div>
 			<div class="row">
 				<div class="col-sm-12">
-					<h4>Available Match (Singles/Doubles)</h4>
+					<h4>Available Match [\(Singles|Doubles\)]</h4>
 				</div>
 			</div>
 
@@ -47,9 +47,11 @@
 					<form onsubmit="return false">
 
 						<fieldset class="form-group">
-							<label>Players</label>
-							<input type="text" class="form-control" placeholder="George Sung cutofflongname... (4.25/M)" readonly>
-							<textarea name="players" rows="4" placeholder="George Sung (4.0/M)\nBlah Blah (3.5/M)"></textarea>
+							<label>Player[s|]</label>
+							<!--input type="text" class="form-control" placeholder="George Sung\n cutofflongname... (4.25/M)" readonly-->
+							<textarea class="form-control" rows="3" placeholder="George Sung (4.5M)
+Set rows in Javascript (5.0/M)
+Annoying newline problem (2.0/M)" readonly></textarea>
 						</fieldset>
 
 						<fieldset class="form-group">

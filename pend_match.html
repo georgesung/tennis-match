@@ -38,13 +38,21 @@
 			</div>
 			<div class="row">
 				<div class="col-sm-12">
-					<h4>Pending Match</h4>
+					<h4>Pending Match [\(Singles|Doubles\)]</h4>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col-sm-12" id="form-container">
 					<form onsubmit="return false">
+
+						<fieldset class="form-group">
+							<label>Player[s|]</label>
+							<!--input type="text" class="form-control" placeholder="George Sung\n cutofflongname... (4.25/M)" readonly-->
+							<textarea class="form-control" rows="3" placeholder="George Sung (4.5M)
+Set rows in Javascript (5.0/M)
+Annoying newline problem (2.0/M)" readonly></textarea>
+						</fieldset>
 
 						<fieldset class="form-group">
 							<label>Date</label>
