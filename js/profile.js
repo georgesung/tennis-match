@@ -60,7 +60,7 @@ function submitHandler() {
 		'ntrpRating':    ntrpRating,
 	};
 
-	//gapi.client.tennis.updateProfile(profile).execute();
+	// Call back-end API
 	gapi.client.tennis.updateProfile(profile).
 		execute(function(resp) {
 			window.location.href = '/dashboard';

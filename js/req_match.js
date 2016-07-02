@@ -1,3 +1,18 @@
+'use strict';
+
+// Any Google API functionality must be executed -after- the gapi is loaded, thus it's placed in a callback
+function onGapiLoad() {
+	// Check Google OAuth
+	gapi.auth.authorize({client_id: CLIENT_ID, scope: SCOPES, immediate: true}, handleAuthResult);
+}
+
+function handleAuthResult(authResult) {
+	if (!(authResult && !authResult.error)) {
+		// If user is not authorized, redirect to login page
+		window.location = '/login';
+	}
+}
+
 // Code for Google Maps API and Google Places Search
 // Code below based on:
 // https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
@@ -62,23 +77,61 @@ $('#back-button').click(function() {
 	window.location.href = '/dashboard';
 });
 
-$('#req-button').click(function() {
-	bootbox.dialog({
-		message: "FIXME: Are you sure I need this dialog? Too much friction!",
-		buttons: {
-			yes: {
-				label: "Yes",
-				className: "btn-primary",
-				callback: function() {
-					console.log("yes!");
+// Validate the form, set up form submit handler (function called when submit-type button is pressed)
+$('#req-match-form').validate({
+	rules: {
+		singles:  'required',
+		date:     'required',
+		time:     'required',
+		location: 'required'
+	},
+	messages: {
+		singles:  'Please choose singles/doubles',
+		date:     'Please enter date',
+		time:     'Please enter time',
+		location: 'Please enter location'
+	},
+	submitHandler: submitHandler,
+});
+
+function submitHandler() {
+	// First, disable all inputs while match request is in process
+	$('.container :input, select, button').attr('disabled', true);
+
+	// Read values from form
+	var singlesDoubles = $('#singles-doubles').val();
+	var date           = $('#date').val();
+	var time           = $('#time').val();
+	var location       = $('#pac-input').val();
+
+	// Convert singlesDoubles to boolean
+	var singles = singlesDoubles=='singles' ? true : false;
+
+	var match = {
+		'singles':   singles,
+		'date':      date,
+		'time':      time,
+		'location':  location,
+		'players':   [],     // back-end will set default value
+		'confirmed': false,  // ditto
+		'ntrp':      0.0,    // ditto
+	};
+
+	// Call back-end API
+	gapi.client.tennis.createMatch(match).
+		execute(function(resp) {
+			bootbox.dialog({
+				closeButton: false,
+				message: "Match request successful",
+				buttons: {
+					ok: {
+						label: "OK",
+						className: "btn-default",
+						callback: function() {
+							window.location.href = '/dashboard';
+						}
+					}
 				}
-			},
-			no: {
-				label: "No",
-				className: "btn-default",
-				callback: function() {
-					console.log("no~");
-				}
-			}
-		}
-	});});
+			});
+		});
+}

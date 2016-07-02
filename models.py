@@ -18,7 +18,7 @@ class Profile(ndb.Model):
 	firstName     = ndb.StringProperty(default='')
 	lastName      = ndb.StringProperty(default='')
 	gender        = ndb.StringProperty(default='m')  # m/f
-	ntrpRating    = ndb.FloatProperty(default=3.5)
+	ntrp          = ndb.FloatProperty(default=3.5)
 	matches       = ndb.StringProperty(repeated=True)  # match keys (store urlsafe version), dynamically changing
 
 class ProfileForm(messages.Message):
@@ -27,22 +27,25 @@ class ProfileForm(messages.Message):
 	firstName     = messages.StringField(3)
 	lastName      = messages.StringField(4)
 	gender        = messages.StringField(5)  # m/f
-	ntrpRating    = messages.FloatField(6)
+	ntrp          = messages.FloatField(6)
 
 
 # Match object, and its messages
 class Match(ndb.Model):
 	# TODO: Ancestor?
-	singles = ndb.BooleanProperty(required=True)
-	dateTime = ndb.DateTimeProperty(required=True)
-	location = ndb.GeoPtProperty(required=True)
-	players = ndb.StringProperty(repeated=True)  # userIds
+	singles   = ndb.BooleanProperty(required=True)
+	dateTime  = ndb.DateTimeProperty(required=True)
+	location  = ndb.StringProperty(required=True)  # no need for GeoPtProperty
+	players   = ndb.StringProperty(repeated=True)  # userIds
 	confirmed = ndb.BooleanProperty(required=True)
+	ntrp      = ndb.FloatProperty(required=True)  # NTRP rating of creator of match
 
 class MatchForm(messages.Message):
-	singles = messages.BooleanField(1)
-	date = messages.StringField(2)
-	time = messages.StringField(3)
-	location = messages.StringField(4)
-	players = messages.StringField(5, repeated=True)
+	singles   = messages.BooleanField(1)
+	date      = messages.StringField(2)
+	time      = messages.StringField(3)
+	location  = messages.StringField(4)
+	players   = messages.StringField(5, repeated=True)
 	confirmed = messages.BooleanField(6)
+	ntrp      = messages.FloatField(7)
+

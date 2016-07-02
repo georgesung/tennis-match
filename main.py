@@ -5,7 +5,6 @@ The API backend
 from datetime import datetime
 import json
 import os
-import datetime
 
 import endpoints
 from protorpc import messages
@@ -17,6 +16,8 @@ from google.appengine.ext import ndb
 
 from models import Profile
 from models import ProfileForm
+from models import Match
+from models import MatchForm
 
 from settings import WEB_CLIENT_ID
 
@@ -36,7 +37,7 @@ class TennisApi(remote.Service):
 	# Match objects
 	###################################################################
 
-	@ndb.transactional()
+	@ndb.transactional(xg=True)
 	def _createMatch(self, request):
 		"""Create new Match, update user Profile to add new Match to Profile.
 		Returns MatchForm/request."""
@@ -45,38 +46,34 @@ class TennisApi(remote.Service):
 		user = endpoints.get_current_user()
 		if not user:
 			raise endpoints.UnauthorizedException('Authorization required')
-		user_id = getUserId(user)
+		user_id = user.email()
 
-		if not (request.singles and request.date and request.time and request.location):
+		# If any field in request is None, then raise exception
+		if any([getattr(request, field.name) is None for field in request.all_fields()]):
 			raise endpoints.BadRequestException('All input fields required to create a match')
 
 		# Copy MatchForm/ProtoRPC Message into dict
 		data = {field.name: getattr(request, field.name) for field in request.all_fields()}
-		print(data)  # DEBUG
+
+		# Get user profile from NDB
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
 
 		# Add default values for those missing
-		data[players] = [user_id]
-		data[confirmed] = False
+		data['players']   = [user_id]
+		data['confirmed'] = False
+		data['ntrp']      = profile.ntrp
 
 		# Convert date/time from string to datetime object
-		# TODO: Make sure the format is consistent
-		data['dateTime'] = datetime.strptime(data['dateTime'], "%Y-%m-%d").date()
+		dt_string = data['date'] + '|' + data['time']
+		data['dateTime'] = datetime.strptime(dt_string, '%m/%d/%Y|%H:%M')
+		del data['date']
+		del data['time']
 
-		# Find Profile key based on user ID
-		# Generate Match ID based on Profile key
-		# Generate Match NDB key based on Match ID
-		profile_key = ndb.Key(Profile, user_id)
-		match_id = Match.allocate_ids(size=1, parent=profile_key)[0]
-		match_key = ndb.Key(Match, match_id, parent=profile_key)
-
-		# Explicitly set the key for the new Match entity
-		data['key'] = match_key
-
-		# Create match, add it to datastore
-		Match(**data).put()
+		# Create new match based on data, and put in datastore
+		match_key = Match(**data).put()
 
 		# Update user profile, adding the new match to Profile.matches
-		profile = profile_key.get()
 		profile.matches.append(match_key.urlsafe())
 		profile.put()
 

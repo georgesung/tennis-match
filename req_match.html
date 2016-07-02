@@ -11,7 +11,18 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
-		<!-- TEMP, copy over API stuff from dashboard.html -->
+		<!-- For Google sign-in -->
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com">
+
+		<!-- Google App Engine API -->
+		<script>
+		function init() {
+			gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
+			gapi.client.load('oauth2', 'v2', null);
+		};
+		</script>
+		<script src="https://apis.google.com/js/client.js?onload=init"></script>
 
 		<!-- My own css -->
 		<link rel="stylesheet" type="text/css" href="/css/style.css">
@@ -36,7 +47,7 @@
 					<button type="button" class="btn btn-default btn-sm" id="back-button">Back</button>
 				</div>
 				<div class="col-xs-6 text-right">
-					<button type="button" class="btn btn-primary btn-sm" id="req-button">Make Request</button>
+					<button form="req-match-form" type="submit" class="btn btn-primary btn-sm" id="req-button">Make Request</button>
 				</div>
 			</div>
 			<div class="row">
@@ -47,11 +58,11 @@
 
 			<div class="row">
 				<div class="col-sm-12" id="form-container">
-					<form onsubmit="return false">
+					<form id="req-match-form" onsubmit="return false">
 
 						<fieldset class="form-group">
 							<label>Singles/Doubles?</label>
-							<select class="form-control" id="singles-doubles">
+							<select class="form-control" id="singles-doubles" name="singles">
 								<option value="singles">Singles</option>
 								<option value="doubles">Doubles</option>
 							</select>
@@ -60,7 +71,7 @@
 						<fieldset class="form-group">
 							<label>Date</label>
 							<div class="input-group date">
-								<input type="text" class="form-control" placeholder="mm/dd/yyyy">
+								<input type="text" class="form-control" id="date" name="date" placeholder="Enter date">
 								<span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
 							</div>
 
@@ -75,7 +86,7 @@
 						<fieldset class="form-group">
 							<label>Time</label>
 							<div class="input-group clockpicker" data-autoclose="true">
-								<input type="text" class="form-control" placeholder="hh:mm">
+								<input type="text" class="form-control" id="time" name="time" placeholder="Enter time">
 								<span class="input-group-addon">
 									<span class="glyphicon glyphicon-time"></span>
 								</span>
@@ -88,7 +99,7 @@
 
 						<fieldset class="form-group">
 							<label>Location</label>
-							<input id="pac-input" class="form-control" type="text" placeholder="Search Location">
+							<input id="pac-input" class="form-control" name="location" type="text" placeholder="Enter location">
 						</fieldset>
 					</form>
 				</div>
@@ -102,6 +113,7 @@
 
 		</div>
 
+		<script src="/js/jquery.validate.min.js"></script>
 		<script src="/js/settings.js"></script>
 		<script src="/js/req_match.js"></script>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCUsuwqOFhS4JIbW9UQms70I7YngynTyS8&libraries=places&callback=initAutocomplete" async defer></script>
