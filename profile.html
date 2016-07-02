@@ -11,19 +11,6 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
-		<!-- For Google sign-in -->
-		<script src="https://apis.google.com/js/platform.js" async defer></script>
-		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com">
-
-		<!-- Google App Engine API -->
-		<script>
-		function init() {
-			gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
-			gapi.client.load('oauth2', 'v2', null);
-		};
-		</script>
-		<script src="https://apis.google.com/js/client.js?onload=init"></script>
-
 		<!-- My own css -->
 		<link rel="stylesheet" type="text/css" href="/css/style.css">
 
@@ -95,5 +82,18 @@
 		<script src="/js/jquery.validate.min.js"></script>
 		<script src="/js/settings.js"></script>
 		<script src="/js/profile.js"></script>
+
+		<!-- For Google sign-in -->
+		<script src="https://apis.google.com/js/platform.js" async defer></script>
+		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com">
+
+		<!-- Google App Engine API -->
+		<script>
+		function init() {
+			gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
+			gapi.client.load('oauth2', 'v2', null);
+		};
+		</script>
+		<script src="https://apis.google.com/js/client.js?onload=init"></script>
 	</body>
 </html>
