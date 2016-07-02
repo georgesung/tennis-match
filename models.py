@@ -19,6 +19,7 @@ class Profile(ndb.Model):
 	lastName      = ndb.StringProperty(default='')
 	gender        = ndb.StringProperty(default='m')  # m/f
 	ntrpRating    = ndb.FloatProperty(default=3.5)
+	matches       = ndb.StringProperty(repeated=True)  # match keys (store urlsafe version), dynamically changing
 
 class ProfileForm(messages.Message):
 	userId        = messages.StringField(1)
@@ -35,10 +36,13 @@ class Match(ndb.Model):
 	singles = ndb.BooleanProperty(required=True)
 	dateTime = ndb.DateTimeProperty(required=True)
 	location = ndb.GeoPtProperty(required=True)
-	players = ndb.StringProperty(repeated=True)  # TODO: Store userId key? Or just plain userId?
+	players = ndb.StringProperty(repeated=True)  # userIds
+	confirmed = ndb.BooleanProperty(required=True)
 
 class MatchForm(messages.Message):
 	singles = messages.BooleanField(1)
-	dateTime = messages.StringField(2)
-	location = messages.StringField(3)
-	players = messages.StringField(4, repeated=True)
+	date = messages.StringField(2)
+	time = messages.StringField(3)
+	location = messages.StringField(4)
+	players = messages.StringField(5, repeated=True)
+	confirmed = messages.BooleanField(6)
