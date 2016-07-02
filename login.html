@@ -38,6 +38,7 @@
 			</div>
 		</div>
 
+		<script src="/js/settings.js"></script>
 		<script src="/js/login.js"></script>
 		<script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
 
@@ -47,10 +48,10 @@
 
 		<!-- Google App Engine API -->
 		<script>
-			function init() {
-				gapi.client.load('tennis', 'v1', null, '//' + window.location.host + '/_ah/api');
-				gapi.client.load('oauth2', 'v2', null);
-			};
+		function init() {
+			gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
+			gapi.client.load('oauth2', 'v2', null);
+		};
 		</script>
 		<script src="https://apis.google.com/js/client.js?onload=init"></script>
 	</body>

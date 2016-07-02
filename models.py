@@ -38,7 +38,7 @@ class Match(ndb.Model):
 	location  = ndb.StringProperty(required=True)  # no need for GeoPtProperty
 	players   = ndb.StringProperty(repeated=True)  # userIds
 	confirmed = ndb.BooleanProperty(required=True)
-	ntrp      = ndb.FloatProperty(required=True)  # NTRP rating of creator of match
+	ntrp      = ndb.FloatProperty(required=True)  # NTRP rating of creator of match, standardized to male rating
 
 class MatchForm(messages.Message):
 	singles   = messages.BooleanField(1)

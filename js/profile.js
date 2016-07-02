@@ -17,7 +17,7 @@ function handleAuthResult(authResult) {
 				$('#first-name').val(resp.result.firstName);
 				$('#last-name').val(resp.result.lastName);
 				$('#gender').val(resp.result.gender);
-				$('#ntrp-rating').slider().slider('setValue', resp.result.ntrpRating);
+				$('#ntrp').slider().slider('setValue', resp.result.ntrp);
 			});
 	} else {
 		// If user is not authorized, redirect to login page
@@ -49,7 +49,7 @@ function submitHandler() {
 	var firstName     = $('#first-name').val();
 	var lastName      = $('#last-name').val();
 	var gender        = $('#gender').val();
-	var ntrpRating    = parseFloat($('#ntrp-rating').val());
+	var ntrp          = parseFloat($('#ntrp').val());
 
 	var profile = {
 		'userId':        'read-from-backend',
@@ -57,7 +57,7 @@ function submitHandler() {
 		'firstName':     firstName,
 		'lastName':      lastName,
 		'gender':        gender,
-		'ntrpRating':    ntrpRating,
+		'ntrp':          ntrp,
 	};
 
 	// Call back-end API
