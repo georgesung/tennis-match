@@ -8,18 +8,27 @@ function onGapiLoad() {
 
 function handleAuthResult(authResult) {
 	if (authResult && !authResult.error) {
-		gapi.client.tennis.getProfile().
-			execute(function(resp) {
-				var userId = resp.result.userId;
+		// Get user profile, show personalized greeting
+		gapi.client.tennis.getProfile().execute(function(resp) {
+			var userId = resp.result.userId;
 
-				// If user has not created a profile, redirect to profile page
-				// Else, stay here
-				if (resp.result.firstName == '' || resp.result.lastName == '') {
-					window.location.href = '/profile';
-				} else {
-					$('#greeting').text('Welcome, ' + resp.result.firstName);
-				}
-			});
+			// If user has not created a profile, redirect to profile page
+			// Else, stay here
+			if (resp.result.firstName == '' || resp.result.lastName == '') {
+				window.location.href = '/profile';
+			} else {
+				$('#greeting').text('Welcome, ' + resp.result.firstName);
+			}
+		});
+
+		// Get all matches for current user, populate Confirmed Matches and Pending Matches
+		gapi.client.tennis.getMyMatches().execute(function(resp) {
+			// The MatchesMsg message is stored in resp.result
+			console.log(resp.result);
+
+			// TODO: Need templating engine to generate the html
+		});
+
 	} else {
 		// If user is not authorized, redirect to login page
 		window.location = '/login';

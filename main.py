@@ -15,9 +15,10 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
 from models import Profile
-from models import ProfileForm
+from models import ProfileMsg
 from models import Match
-from models import MatchForm
+from models import MatchMsg
+from models import MatchesMsg
 
 from settings import WEB_CLIENT_ID
 
@@ -40,7 +41,7 @@ class TennisApi(remote.Service):
 	@ndb.transactional(xg=True)
 	def _createMatch(self, request):
 		"""Create new Match, update user Profile to add new Match to Profile.
-		Returns MatchForm/request."""
+		Returns MatchMsg/request."""
 
 		# Preload necessary data items
 		user = endpoints.get_current_user()
@@ -52,7 +53,7 @@ class TennisApi(remote.Service):
 		if any([getattr(request, field.name) is None for field in request.all_fields()]):
 			raise endpoints.BadRequestException('All input fields required to create a match')
 
-		# Copy MatchForm/ProtoRPC Message into dict
+		# Copy MatchMsg/ProtoRPC Message into dict
 		data = {field.name: getattr(request, field.name) for field in request.all_fields()}
 
 		# Get user profile from NDB
@@ -79,7 +80,7 @@ class TennisApi(remote.Service):
 
 		return request
 
-	@endpoints.method(MatchForm, MatchForm, path='',
+	@endpoints.method(MatchMsg, MatchMsg, path='',
 		http_method='POST', name='createMatch')
 	def createMatch(self, request):
 		"""Create new Match"""
@@ -91,15 +92,15 @@ class TennisApi(remote.Service):
 	###################################################################
 
 	def _copyProfileToForm(self, prof):
-		"""Copy relevant fields from Profile to ProfileForm."""
-		pf = ProfileForm()
+		"""Copy relevant fields from Profile to ProfileMsg."""
+		pf = ProfileMsg()
 		for field in pf.all_fields():
 			if hasattr(prof, field.name):
 				setattr(pf, field.name, getattr(prof, field.name))
 		pf.check_initialized()
 		return pf
 
-	@endpoints.method(message_types.VoidMessage, ProfileForm,
+	@endpoints.method(message_types.VoidMessage, ProfileMsg,
 			path='', http_method='GET', name='getProfile')
 	def getProfile(self, request):
 		"""Return user profile."""
@@ -125,7 +126,7 @@ class TennisApi(remote.Service):
 
 		return self._copyProfileToForm(profile)
 
-	@endpoints.method(ProfileForm, ProfileForm,
+	@endpoints.method(ProfileMsg, ProfileMsg,
 			path='', http_method='POST', name='updateProfile')
 	def updateProfile(self, request):
 		"""Update user profile."""
@@ -154,6 +155,58 @@ class TennisApi(remote.Service):
 		profile.put()
 
 		return self._copyProfileToForm(profile)
+
+	###################################################################
+	# Queries
+	###################################################################
+
+	@endpoints.method(message_types.VoidMessage, MatchesMsg,
+			path='', http_method='GET', name='getMyMatches')
+	def getMyMatches(self, request):
+		"""Return user profile."""
+		user = endpoints.get_current_user()
+
+		if not user:
+			raise endpoints.UnauthorizedException('Authorization required')
+
+		# Get user Profile based on userId (email)
+		profile = ndb.Key(Profile, user.email()).get()
+
+		# Create new MatchesMsg message
+		matches_msg = MatchesMsg()
+
+		# For each match is user's matches, add the info to match_msg
+		for match_key in profile.matches:
+			match = ndb.Key(urlsafe=match_key).get()
+
+			# Convert datetime object into separate date and time strings
+			date, time = match.dateTime.strftime('%m/%d/%Y|%H:%M').split('|')
+
+			# Convert match.players into pipe-separated 'firstName lastName' string
+			# e.g. ['Bob Smith|John Doe|Alice Wonderland|Foo Bar', 'Blah Blah|Hello World']
+			players = ''
+			for player_id in match.players:
+				player_profile = ndb.Key(Profile, player_id).get()
+
+				first_name = player_profile.firstName
+				last_name = player_profile.lastName
+
+				players += first_name + ' ' + last_name + '|'
+			players = players.rstrip('|')
+
+			# Populate fields in matches_msg
+			matches_msg.singles.append(match.singles)
+			matches_msg.date.append(date)
+			matches_msg.time.append(time)
+			matches_msg.location.append(match.location)
+			matches_msg.players.append(players)
+			matches_msg.confirmed.append(match.confirmed)
+			matches_msg.match_keys.append(match_key)
+
+		print(matches_msg)  # DEBUG
+
+		return matches_msg
+
 
 # registers API
 api = endpoints.api_server([TennisApi])

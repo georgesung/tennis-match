@@ -21,7 +21,7 @@ class Profile(ndb.Model):
 	ntrp          = ndb.FloatProperty(default=3.5)
 	matches       = ndb.StringProperty(repeated=True)  # match keys (store urlsafe version), dynamically changing
 
-class ProfileForm(messages.Message):
+class ProfileMsg(messages.Message):
 	userId        = messages.StringField(1)
 	contactEmail  = messages.StringField(2)
 	firstName     = messages.StringField(3)
@@ -40,12 +40,23 @@ class Match(ndb.Model):
 	confirmed = ndb.BooleanProperty(required=True)
 	ntrp      = ndb.FloatProperty(required=True)  # NTRP rating of creator of match, standardized to male rating
 
-class MatchForm(messages.Message):
+class MatchMsg(messages.Message):
 	singles   = messages.BooleanField(1)
 	date      = messages.StringField(2)
 	time      = messages.StringField(3)
 	location  = messages.StringField(4)
-	players   = messages.StringField(5, repeated=True)
+	players   = messages.StringField(5, repeated=True)  # user 'firstName lastName' (*not* userId)
 	confirmed = messages.BooleanField(6)
 	ntrp      = messages.FloatField(7)
 
+# Represents multiple matches
+# Each entry in 'players' field is pipe-separated name string, e.g.
+# players = ['Bob Smith|John Doe|Alice Wonderland|Foo Bar', 'Blah Blah|Hello World', 'George Sung']
+class MatchesMsg(messages.Message):
+	singles    = messages.BooleanField(1, repeated=True)
+	date       = messages.StringField(2, repeated=True)
+	time       = messages.StringField(3, repeated=True)
+	location   = messages.StringField(4, repeated=True)
+	players    = messages.StringField(5, repeated=True)
+	confirmed  = messages.BooleanField(6, repeated=True)
+	match_keys = messages.StringField(7, repeated=True)  # ndb key for each Match entity
