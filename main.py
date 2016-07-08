@@ -163,7 +163,7 @@ class TennisApi(remote.Service):
 	@endpoints.method(message_types.VoidMessage, MatchesMsg,
 			path='', http_method='GET', name='getMyMatches')
 	def getMyMatches(self, request):
-		"""Return user profile."""
+		"""Get all confirmed or pending matches for current user."""
 		user = endpoints.get_current_user()
 
 		if not user:
@@ -202,8 +202,6 @@ class TennisApi(remote.Service):
 			matches_msg.players.append(players)
 			matches_msg.confirmed.append(match.confirmed)
 			matches_msg.match_keys.append(match_key)
-
-		print(matches_msg)  # DEBUG
 
 		return matches_msg
 

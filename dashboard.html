@@ -4,8 +4,10 @@
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<!-- Include jQuery -->
+		<!-- Include jQuery (Bootstrap JS needs it) -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<!-- Include AngularJS -->
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
 
 		<!-- Using Bootstrap CDN to include Bootstrap -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
@@ -20,12 +22,12 @@
 
 		<title>Dashboard</title>
 	</head>
-	<body>
-		<div class="container">
+	<body ng-app="dashboard">
+		<div class="container" id="dashboard" ng-controller="DashboardCtrl as dash">
 
 			<div class="row">
 				<div class="col-xs-6">
-					<i><small id="greeting"></small></i>
+					<i><small id="greeting">Welcome, {{dash.firstName}}</small></i>
 				</div>
 				<div class="col-xs-6 text-right">
 					<div class="btn-group">
@@ -55,6 +57,20 @@
 
 			<div class="row"><div class="col-sm-12">
 				<h5><b>Confirmed Matches</b></h5>
+				<div class="row match-info conf-match" ng-repeat="match in dash.confirmedMatches">
+					<div class="col-sm-4">
+						<div>{{match.players}}</div>
+					</div>
+					<div class="col-sm-4">
+						<div>{{match.location}}</div>
+					</div>
+					<div class="col-sm-4">
+						<div>{{match.date}} - {{match.time}}</div>
+					</div>
+				</div>
+				<i ng-if="dash.confirmedMatches.length == 0">none</i>
+
+				<!-- DELETEME placeholders -->
 				<div class="row match-info conf-match">
 					<div class="col-sm-4">
 						<div>Brute Force</div>
@@ -81,26 +97,35 @@
 
 			<div class="row"><div class="col-sm-12" id="pend-matches">
 				<h5><b>Pending Matches</b></h5>
-				<div class="row match-info pend-match">
+				<div class="row match-info pend-match" ng-repeat="match in dash.pendingMatches">
 					<div class="col-sm-6">
-						<div>BF Dr., Waltham MA</div>
+						<div>{{match.location}}</div>
 					</div>
 					<div class="col-sm-6">
-						<div>Jun. 22, 2016 - 4:00 PM</div>
-					</div>
-				</div>
-				<div class="row match-info pend-match">
-					<div class="col-sm-6">
-						<div>MIT Courts, Cambridge MA</div>
-					</div>
-					<div class="col-sm-6">
-						<div>Jun. 23, 2016 - 2:00 AM</div>
+						<div>{{match.date}} - {{match.time}}</div>
 					</div>
 				</div>
+				<i ng-if="dash.pendingMatches.length == 0">none</i>
 			</div></div>
 
 			<div class="row"><div class="col-sm-12">
 				<h5><b>Available Matches</b></h5>
+				<div class="row match-info conf-match" ng-repeat="match in dash.availableMatches">
+					<div class="col-sm-4">
+						<div>{{match.players}}</div>
+					</div>
+					<div class="col-sm-4">
+						<div>{{match.location}}</div>
+					</div>
+					<div class="col-sm-4">
+						<div>{{match.date}} - {{match.time}}</div>
+					</div>
+				</div>
+				<i ng-if="dash.availableMatches.length == 0">none</i>
+
+
+
+				<!-- DELETEME placeholders -->
 				<div class="row match-info avail-match">
 					<div class="col-sm-4">
 						<div>Brute Force</div>
