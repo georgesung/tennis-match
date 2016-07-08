@@ -55,7 +55,6 @@ function handleAuthResult(authResult) {
 
 			var confirmedMatches = [];
 			var pendingMatches = [];
-			var availableMatches = [];
 
 			for (var i = 0; i < num_matches; i++) {
 				var newMatch = new Match(
@@ -78,6 +77,34 @@ function handleAuthResult(authResult) {
 			$scope.$apply(function () {
 				$scope.dash.confirmedMatches = confirmedMatches;
 				$scope.dash.pendingMatches = pendingMatches;
+			});
+		});
+
+		// Query all available matches for current user, populate Available Matches
+		gapi.client.tennis.getAvailableMatches().execute(function(resp) {
+			// The MatchesMsg message is stored in resp.result
+			// Go through all matches in the match "list" (see models.py for format)
+			var matches = resp.result;
+			var num_matches = matches.singles.length;
+
+			var availableMatches = [];
+
+			for (var i = 0; i < num_matches; i++) {
+				var newMatch = new Match(
+					matches.singles[i],
+					matches.date[i],
+					matches.time[i],
+					matches.location[i],
+					matches.players[i],
+					matches.confirmed[i]
+				);
+
+				availableMatches.push(newMatch);
+			}
+
+			// Point to the availableMatches in the controller
+			$scope.$apply(function () {
+				$scope.dash.availableMatches = availableMatches;
 			});
 		});
 

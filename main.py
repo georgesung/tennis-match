@@ -3,6 +3,8 @@ The API backend
 '''
 
 from datetime import datetime
+from datetime import timedelta
+from eastern_tzinfo import Eastern_tzinfo
 import json
 import os
 
@@ -202,6 +204,70 @@ class TennisApi(remote.Service):
 			matches_msg.players.append(players)
 			matches_msg.confirmed.append(match.confirmed)
 			matches_msg.match_keys.append(match_key)
+
+		return matches_msg
+
+	@endpoints.method(message_types.VoidMessage, MatchesMsg,
+			path='', http_method='GET', name='getAvailableMatches')
+	def getAvailableMatches(self, request):
+		"""
+		Get all available matches for current user.
+		Search through DB to find partners of similar skill.
+		"""
+		user = endpoints.get_current_user()
+
+		if not user:
+			raise endpoints.UnauthorizedException('Authorization required')
+
+		# Get user Profile based on userId (email)
+		profile = ndb.Key(Profile, user.email()).get()
+
+		# Create new MatchesMsg message
+		matches_msg = MatchesMsg()
+
+		# Women's NTRP is equivalent to -0.5 men's NTRP, from empirical observation
+		my_ntrp = profile.ntrp
+		if profile.gender == 'f':
+			my_ntrp -= 0.5
+
+		# Query the DB to find matches where partner is of similar skill
+		query = Match.query(ndb.OR(Match.ntrp == my_ntrp, Match.ntrp == my_ntrp + 0.5, Match.ntrp == my_ntrp - 0.5))
+		query = query.order(Match.dateTime)  # ascending datetime order (i.e. earliest matches first)
+
+		for match in query:
+			# Ignore matches current user is already participating in
+			if profile.userId in match.players:
+				continue
+
+			# Ignore matches in the past, or matches that will occur in less than 30 minutes
+			# Note we store matches in naive time, but datetime.now() returns UTC time,
+			# so we use tzinfo object to convert to local time
+			if match.dateTime - timedelta(minutes=30) < datetime.now(Eastern_tzinfo()).replace(tzinfo=None):
+				continue
+
+			# Convert datetime object into separate date and time strings
+			date, time = match.dateTime.strftime('%m/%d/%Y|%H:%M').split('|')
+
+			# Convert match.players into pipe-separated 'firstName lastName' string
+			# e.g. ['Bob Smith|John Doe|Alice Wonderland|Foo Bar', 'Blah Blah|Hello World']
+			players = ''
+			for player_id in match.players:
+				player_profile = ndb.Key(Profile, player_id).get()
+
+				first_name = player_profile.firstName
+				last_name = player_profile.lastName
+
+				players += first_name + ' ' + last_name + '|'
+			players = players.rstrip('|')
+
+			# Populate fields in matches_msg
+			matches_msg.singles.append(match.singles)
+			matches_msg.date.append(date)
+			matches_msg.time.append(time)
+			matches_msg.location.append(match.location)
+			matches_msg.players.append(players)
+			matches_msg.confirmed.append(match.confirmed)
+			matches_msg.match_keys.append(match.key.urlsafe())
 
 		return matches_msg
 

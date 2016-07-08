@@ -34,7 +34,7 @@ class ProfileMsg(messages.Message):
 class Match(ndb.Model):
 	# TODO: Ancestor?
 	singles   = ndb.BooleanProperty(required=True)
-	dateTime  = ndb.DateTimeProperty(required=True)
+	dateTime  = ndb.DateTimeProperty(required=True)  # naive time, no time zone info, assuming "local" timezone
 	location  = ndb.StringProperty(required=True)  # no need for GeoPtProperty
 	players   = ndb.StringProperty(repeated=True)  # userIds
 	confirmed = ndb.BooleanProperty(required=True)
