@@ -48,6 +48,8 @@ function handleAuthResult(authResult) {
 
 		// Get all matches for current user, populate Confirmed Matches and Pending Matches
 		gapi.client.tennis.getMyMatches().execute(function(resp) {
+			if ($.isEmptyObject(resp.result)) { return; }
+
 			// The MatchesMsg message is stored in resp.result
 			// Go through all matches in the match "list" (see models.py for format)
 			var matches = resp.result;
@@ -82,6 +84,8 @@ function handleAuthResult(authResult) {
 
 		// Query all available matches for current user, populate Available Matches
 		gapi.client.tennis.getAvailableMatches().execute(function(resp) {
+			if ($.isEmptyObject(resp.result)) { return; }
+			
 			// The MatchesMsg message is stored in resp.result
 			// Go through all matches in the match "list" (see models.py for format)
 			var matches = resp.result;
