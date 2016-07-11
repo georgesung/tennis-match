@@ -1,0 +1,89 @@
+<!-- Using Bootstrap CDN to include Bootstrap -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+<!-- My own css -->
+<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+<!-- Bootstrap Toggle button: http://www.bootstraptoggle.com -->
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+<div class="container">
+
+	<div class="row">
+		<div class="col-xs-6">
+			<i><small id="greeting">Welcome, {{summary.firstName}}</small></i>
+		</div>
+		<div class="col-xs-6 text-right">
+			<div class="btn-group">
+				<button type="button" class="btn btn-primary btn-sm" id="req-button">Request Match</button>
+				<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<span class="caret"></span>
+					<span class="sr-only">Toggle Dropdown</span>
+				</button>
+				<ul class="dropdown-menu pull-right">
+					<li><a href="#">Filter Available Matches</a></li>
+					<li><a href="/profile">My Profile</a></li>
+					<li><a href="#">FAQ</a></li>
+					<li role="separator" class="divider"></li>
+					<li><a href="#">Log Out</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+		<i><small>Select singles/doubles:</small></i><br>
+		<input type="checkbox" data-toggle="toggle" data-on="Doubles" data-off="Singles"
+			data-onstyle="default" data-offstyle="default" data-size="mini">
+		</div>
+	</div>
+
+	<div class="row"><div class="col-sm-12">
+		<h5><b>Confirmed Matches</b></h5>
+		<div class="row match-info conf-match" ng-repeat="match in summary.confirmedMatches">
+			<div class="col-sm-4">
+				<div>{{match.players}}</div>
+			</div>
+			<div class="col-sm-4">
+				<div>{{match.location}}</div>
+			</div>
+			<div class="col-sm-4">
+				<div>{{match.date}} - {{match.time}}</div>
+			</div>
+		</div>
+		<i ng-if="summary.confirmedMatches.length == 0">none</i>
+	</div></div>
+
+	<div class="row"><div class="col-sm-12" id="pend-matches">
+		<h5><b>Pending Matches</b></h5>
+		<div class="row match-info pend-match" ng-repeat="match in summary.pendingMatches" ng-click="summary.showPendMatch(match)">
+			<div class="col-sm-6">
+				<div>{{match.location}}</div>
+			</div>
+			<div class="col-sm-6">
+				<div>{{match.date}} - {{match.time}}</div>
+			</div>
+		</div>
+		<i ng-if="summary.pendingMatches.length == 0">none</i>
+	</div></div>
+
+	<div class="row"><div class="col-sm-12">
+		<h5><b>Available Matches</b></h5>
+		<div class="row match-info conf-match" ng-repeat="match in summary.availableMatches">
+			<div class="col-sm-4">
+				<div>{{match.players}}</div>
+			</div>
+			<div class="col-sm-4">
+				<div>{{match.location}}</div>
+			</div>
+			<div class="col-sm-4">
+				<div>{{match.date}} - {{match.time}}</div>
+			</div>
+		</div>
+		<i ng-if="summary.availableMatches.length == 0">none</i>
+	</div></div>
+
+</div>

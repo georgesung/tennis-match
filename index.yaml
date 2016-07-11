@@ -13,9 +13,9 @@ indexes:
 - kind: Match
   properties:
   - name: ntrp
-  - name: players
+  - name: dateTime
 
 - kind: Match
   properties:
   - name: ntrp
-  - name: dateTime
+  - name: players

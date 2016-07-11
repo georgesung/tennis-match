@@ -1,16 +1,5 @@
 'use strict';
 
-// AngularJS
-angular.module('dashboard', [])
-	.controller('DashboardCtrl', function() {
-		var dash = this;
-		dash.firstName = '';
-		dash.confirmedMatches = [];
-		dash.pendingMatches = [];
-		dash.availableMatches = [];
-	});
-
-
 // Declare classes
 var Match = function(singles, date, time, location, players, confirmed) {
 	this.singles = singles;
@@ -20,6 +9,53 @@ var Match = function(singles, date, time, location, players, confirmed) {
 	this.players = players;
 	this.confirmed = confirmed;
 };
+
+
+// AngularJS
+var app = angular.module('dashboard', ['ngRoute']);
+
+app.config(['$routeProvider', function($routeProvider) {
+	$routeProvider
+		.when('/' , {templateUrl: '/templates/summary.html', controller: 'SummaryCtrl as summary'})
+		.when('/pend_match' , {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
+		.otherwise({redirectTo:'/'});
+}]);
+
+// "Global variable"/service to store current match to view details of it
+app.factory('currentMatch', function() {
+	var myMatch = new Match(true, 'a', 'b', 'c', 'd', false);
+
+	function set(match) {
+		myMatch = match;
+	}
+
+	function get() {
+		return myMatch;
+	}
+
+	return {
+		set: set,
+		get: get
+	}
+});
+
+app.controller('SummaryCtrl', function(currentMatch) {
+	var summary = this;
+	summary.firstName = '';
+	summary.confirmedMatches = [];
+	summary.pendingMatches = [];
+	summary.availableMatches = [];
+
+	summary.showPendMatch = function(match) {
+		currentMatch.set(match);
+		window.location.href = '#/pend_match';
+	};
+});
+
+app.controller('MatchCtrl', function(currentMatch) {
+	var match = this;
+	match.currentMatch = currentMatch.get();
+});
 
 
 // Any Google API functionality must be executed -after- the gapi is loaded, thus it's placed in a callback
@@ -42,7 +78,7 @@ function handleAuthResult(authResult) {
 			if (resp.result.firstName == '' || resp.result.lastName == '') {
 				window.location.href = '/profile';
 			} else {
-				$scope.$apply(function () { $scope.dash.firstName = resp.result.firstName; });
+				$scope.$apply(function () { $scope.summary.firstName = resp.result.firstName; });
 			}
 		});
 
@@ -77,15 +113,15 @@ function handleAuthResult(authResult) {
 
 			// Point to the confirmed/pendingMatches in the controller
 			$scope.$apply(function () {
-				$scope.dash.confirmedMatches = confirmedMatches;
-				$scope.dash.pendingMatches = pendingMatches;
+				$scope.summary.confirmedMatches = confirmedMatches;
+				$scope.summary.pendingMatches = pendingMatches;
 			});
 		});
 
 		// Query all available matches for current user, populate Available Matches
 		gapi.client.tennis.getAvailableMatches().execute(function(resp) {
 			if ($.isEmptyObject(resp.result)) { return; }
-			
+
 			// The MatchesMsg message is stored in resp.result
 			// Go through all matches in the match "list" (see models.py for format)
 			var matches = resp.result;
@@ -108,7 +144,7 @@ function handleAuthResult(authResult) {
 
 			// Point to the availableMatches in the controller
 			$scope.$apply(function () {
-				$scope.dash.availableMatches = availableMatches;
+				$scope.summary.availableMatches = availableMatches;
 			});
 		});
 
@@ -118,6 +154,7 @@ function handleAuthResult(authResult) {
 	}
 }
 
+/*
 // On-click handlers
 $('#req-button').click(function() {
 	window.location.href = '/req_match';
@@ -134,3 +171,4 @@ $('.pend-match').click(function() {
 $('.avail-match').click(function() {
 	window.location.href = '/avail_match';
 });
+*/

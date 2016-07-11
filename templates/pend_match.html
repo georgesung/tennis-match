@@ -1,0 +1,62 @@
+<!-- Using Bootstrap CDN to include Bootstrap -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+<!-- My own css -->
+<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+<!-- Bootbox: http://bootboxjs.com -->
+<script src="/js/bootbox.min.js" async defer></script>
+
+<div class="container">
+	<div class="row">
+		<div class="col-xs-6">
+			<button type="button" class="btn btn-default btn-sm" id="back-button">Back</button>
+		</div>
+		<div class="col-xs-6 text-right">
+			<button type="button" class="btn btn-danger btn-sm" id="cancel-button">Cancel Request</button>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<h4>Pending Match: <span ng-if="match.currentMatch.singles">Singles</span><span ng-if="!match.currentMatch.singles">Doubles</span></h4>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12" id="form-container">
+			<form onsubmit="return false">
+
+				<fieldset class="form-group">
+					<label>Players</label>
+					<textarea class="form-control" rows="3" wrap readonly>{{match.currentMatch.players}}</textarea>
+				</fieldset>
+
+				<fieldset class="form-group">
+					<label>Date</label>
+					<input type="text" class="form-control" placeholder="{{match.currentMatch.date}}" readonly>
+				</fieldset>
+
+				<fieldset class="form-group">
+					<label>Time</label>
+					<input type="text" class="form-control" placeholder="{{match.currentMatch.time}}" readonly>
+				</fieldset>
+
+				<fieldset class="form-group">
+					<label>Location</label>
+					<input id="pac-input" class="form-control" type="text" placeholder="{{match.currentMatch.location}}" readonly>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div id="map" style="height:250px;"></div>
+		</div>
+	</div>
+
+</div>
+
+<script src="/js/pend_match.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCUsuwqOFhS4JIbW9UQms70I7YngynTyS8&libraries=places&callback=initAutocomplete" async defer></script>

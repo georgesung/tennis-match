@@ -13,11 +13,41 @@ function initAutocomplete() {
 	var input = document.getElementById('pac-input');
 	var searchBox = new google.maps.places.SearchBox(input);
 
+	var places = searchBox.getPlaces();
+
+	if (places.length == 0) {
+		return;
+	}
+
+	var markers = [];
+
+	// Only get location of first place
+	var bounds = new google.maps.LatLngBounds();
+	var place = places[0];
+
+	// Create a marker for each place.
+	markers.push(new google.maps.Marker({
+		map: map,
+		title: place.name,
+		position: place.geometry.location
+	}));
+
+	if (place.geometry.viewport) {
+		// Only geocodes have viewport.
+		bounds.union(place.geometry.viewport);
+	} else {
+		bounds.extend(place.geometry.location);
+	}
+
+	map.fitBounds(bounds);
+	map.setZoom(15);
+
 	// Bias the SearchBox results towards current map's viewport.
 	map.addListener('bounds_changed', function() {
 		searchBox.setBounds(map.getBounds());
 	});
 
+	/*
 	var markers = [];
 	// Listen for the event fired when the user selects a prediction and retrieve
 	// more details for that place.
@@ -55,6 +85,7 @@ function initAutocomplete() {
 		map.fitBounds(bounds);
 		map.setZoom(15);
 	});
+	*/
 }
 
 // On-click handlers

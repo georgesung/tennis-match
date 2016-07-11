@@ -12,6 +12,9 @@ handlers:
 - url: /css
   static_dir: css
 
+- url: /templates
+  static_dir: templates
+
 - url: /
   static_files: dashboard.html
   upload: dashboard\.html
