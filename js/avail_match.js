@@ -2,6 +2,20 @@
 // https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
 
 function initAutocomplete() {
+	// Find out the location string
+	var location = document.getElementById('pac-input').placeholder;
+
+	// Execute Google Places search
+	var request = {
+		location: {lat: 42.355137, lng: -71.065604},
+		radius: '50000',  // 50000 meters ~ 31 miles
+		query: location
+	};
+	service = new google.maps.places.PlacesService(map);
+	service.textSearch(request, locSearchCallback);
+}
+
+function locSearchCallback(results, status) {
 	var map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 42.355137, lng: -71.065604},
 		zoom: 12,
@@ -9,36 +23,13 @@ function initAutocomplete() {
 		mapTypeControl: false,
 	});
 
-	// Create the search box and link it to the UI element.
-	var input = document.getElementById('pac-input');
-	var searchBox = new google.maps.places.SearchBox(input);
+	if (status == google.maps.places.PlacesServiceStatus.OK) {
+		var place = results[0];
 
-	// Bias the SearchBox results towards current map's viewport.
-	map.addListener('bounds_changed', function() {
-		searchBox.setBounds(map.getBounds());
-	});
-
-	var markers = [];
-	// Listen for the event fired when the user selects a prediction and retrieve
-	// more details for that place.
-	searchBox.addListener('places_changed', function() {
-		var places = searchBox.getPlaces();
-
-		if (places.length == 0) {
-			return;
-		}
-
-		// Clear out the old markers.
-		markers.forEach(function(marker) {
-			marker.setMap(null);
-		});
-		markers = [];
-
-		// Only get location of first place
 		var bounds = new google.maps.LatLngBounds();
-		var place = places[0];
 
 		// Create a marker for each place.
+		var markers = [];
 		markers.push(new google.maps.Marker({
 			map: map,
 			title: place.name,
@@ -53,8 +44,8 @@ function initAutocomplete() {
 		}
 
 		map.fitBounds(bounds);
-		map.setZoom(15);
-	});
+		map.setZoom(12);  // doesn't work
+	}
 }
 
 // On-click handlers

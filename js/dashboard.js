@@ -18,6 +18,7 @@ app.config(['$routeProvider', function($routeProvider) {
 	$routeProvider
 		.when('/' , {templateUrl: '/templates/summary.html', controller: 'SummaryCtrl as summary'})
 		.when('/pend_match' , {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
+		.when('/avail_match' , {templateUrl: '/templates/avail_match.html', controller: 'MatchCtrl as match'})
 		.otherwise({redirectTo:'/'});
 }]);
 
@@ -49,6 +50,11 @@ app.controller('SummaryCtrl', function(currentMatch) {
 	summary.showPendMatch = function(match) {
 		currentMatch.set(match);
 		window.location.href = '#/pend_match';
+	};
+
+	summary.showAvailMatch = function(match) {
+		currentMatch.set(match);
+		window.location.href = '#/avail_match';
 	};
 });
 
