@@ -21,6 +21,8 @@ from models import ProfileMsg
 from models import Match
 from models import MatchMsg
 from models import MatchesMsg
+from models import StringMsg
+from models import BooleanMsg
 
 from settings import WEB_CLIENT_ID
 
@@ -87,6 +89,66 @@ class TennisApi(remote.Service):
 	def createMatch(self, request):
 		"""Create new Match"""
 		return self._createMatch(request)
+
+
+	@ndb.transactional(xg=True)
+	def _joinMatch(self, request):
+		"""Join an available Match, given Match's key.
+		If there is mid-air collision, return false. If successful, return true."""
+
+		# Preload necessary data items
+		user = endpoints.get_current_user()
+		if not user:
+			raise endpoints.UnauthorizedException('Authorization required')
+		user_id = user.email()
+
+		# If any field in request is None, then raise exception
+		if request.data is None:
+			raise endpoints.BadRequestException('Need match ID from request.data')
+
+		# Get match key, then get the Match entity from db
+		match_key = request.data
+		match = ndb.Key(urlsafe=match_key).get()
+
+		# Make sure match is not full. If full, return false.
+		match_full = False
+		if match.singles and len(match.players) >= 2:
+			match_full = True
+		elif not match.singles and len(match.players) >= 4:
+			match_full = True
+
+		if match_full:
+			status = BooleanMsg()
+			status.data = False
+			return status
+
+		# Update 'players' and 'confirmed' fields (if needed)
+		match.players.append(user_id)
+
+		if match.singles or len(match.players) >= 4:
+			match.confirmed = True
+
+		# Update Match db
+		match.put()
+
+		# Add current match key to current user's matches list
+		profile_key = ndb.Key(Profile, user.email())
+		profile = profile_key.get()
+		profile.matches.append(match_key)
+		profile.put()
+
+		# Return true, for success
+		status = BooleanMsg()
+		status.data = True
+
+		return status
+
+
+	@endpoints.method(StringMsg, BooleanMsg, path='',
+		http_method='POST', name='joinMatch')
+	def joinMatch(self, request):
+		"""Join an available Match, given Match's key"""
+		return self._joinMatch(request)
 
 
 	###################################################################
@@ -203,7 +265,7 @@ class TennisApi(remote.Service):
 			matches_msg.location.append(match.location)
 			matches_msg.players.append(players)
 			matches_msg.confirmed.append(match.confirmed)
-			matches_msg.match_keys.append(match_key)
+			matches_msg.key.append(match_key)
 
 		return matches_msg
 
@@ -267,7 +329,7 @@ class TennisApi(remote.Service):
 			matches_msg.location.append(match.location)
 			matches_msg.players.append(players)
 			matches_msg.confirmed.append(match.confirmed)
-			matches_msg.match_keys.append(match.key.urlsafe())
+			matches_msg.key.append(match.key.urlsafe())
 
 		return matches_msg
 

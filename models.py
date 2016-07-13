@@ -59,4 +59,11 @@ class MatchesMsg(messages.Message):
 	location   = messages.StringField(4, repeated=True)
 	players    = messages.StringField(5, repeated=True)
 	confirmed  = messages.BooleanField(6, repeated=True)
-	match_keys = messages.StringField(7, repeated=True)  # ndb key for each Match entity
+	key        = messages.StringField(7, repeated=True)  # ndb key for each Match entity
+
+# Generic data messages
+class BooleanMsg(messages.Message):
+	data = messages.BooleanField(1)
+
+class StringMsg(messages.Message):
+	data = messages.StringField(1)

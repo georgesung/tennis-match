@@ -54,23 +54,34 @@ $('#back-button').click(function() {
 });
 
 $('#play-button').click(function() {
-	bootbox.dialog({
-		message: "Are you sure?",
-		buttons: {
-			yes: {
-				label: "Yes",
-				className: "btn-primary",
-				callback: function() {
-					console.log("yes!");
-				}
-			},
-			no: {
-				label: "No",
-				className: "btn-default",
-				callback: function() {
-					console.log("no~");
+	// Join the match, specify the match key to back-end
+
+	// Get current match key, create the string message to back-end API
+	var $scope = $('#dashboard').scope();
+	var matchKey = {data: $scope.match.currentMatch.key};
+
+	// Call back-end API to (attempt to) join the match
+	gapi.client.tennis.joinMatch(matchKey).execute(function(resp) {
+		console.log(resp.data);
+
+		var resultMsg = '';
+		if (resp.data) {
+			resultMsg = 'Successfully joined the match!'
+		} else {
+			resultMsg = 'Sorry, the match is already full'
+		}
+		bootbox.dialog({
+			closeButton: false,
+			message: resultMsg,
+			buttons: {
+				ok: {
+					label: "OK",
+					className: "btn-default",
+					callback: function() {
+						window.location.href = '/dashboard';
+					}
 				}
 			}
-		}
+		});
 	});
 });

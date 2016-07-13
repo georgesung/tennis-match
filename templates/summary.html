@@ -43,7 +43,7 @@
 
 	<div class="row"><div class="col-sm-12">
 		<h5><b>Confirmed Matches</b></h5>
-		<div class="row match-info conf-match" ng-repeat="match in summary.confirmedMatches">
+		<div class="row match-info conf-match" ng-repeat="match in summary.confirmedMatches" ng-click="summary.showConfMatch(match)">
 			<div class="col-sm-4">
 				<div>{{match.players}}</div>
 			</div>

@@ -1,13 +1,14 @@
 'use strict';
 
 // Declare classes
-var Match = function(singles, date, time, location, players, confirmed) {
+var Match = function(singles, date, time, location, players, confirmed, key) {
 	this.singles = singles;
 	this.date = date;
 	this.time = time;
 	this.location = location;
 	this.players = players;
 	this.confirmed = confirmed;
+	this.key = key;
 };
 
 
@@ -18,6 +19,7 @@ app.config(['$routeProvider', function($routeProvider) {
 	$routeProvider
 		.when('/',              {templateUrl: '/templates/summary.html', controller: 'SummaryCtrl as summary'})
 		.when('/req_match',     {templateUrl: '/templates/req_match.html', controller: 'ReqCtrl as req'})
+		.when('/conf_match',    {templateUrl: '/templates/conf_match.html', controller: 'MatchCtrl as match'})
 		.when('/pend_match',    {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
 		.when('/avail_match',   {templateUrl: '/templates/avail_match.html', controller: 'MatchCtrl as match'})
 		.otherwise({redirectTo:'/'});
@@ -165,7 +167,8 @@ function handleAuthResult(authResult) {
 					matches.time[i],
 					matches.location[i],
 					matches.players[i],
-					matches.confirmed[i]
+					matches.confirmed[i],
+					matches.key[i]
 				);
 
 				if (newMatch.confirmed) {
@@ -200,7 +203,8 @@ function handleAuthResult(authResult) {
 					matches.time[i],
 					matches.location[i],
 					matches.players[i],
-					matches.confirmed[i]
+					matches.confirmed[i],
+					matches.key[i]
 				);
 
 				availableMatches.push(newMatch);
