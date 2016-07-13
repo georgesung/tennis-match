@@ -3,7 +3,7 @@
 
 function initAutocomplete() {
 	// Find out the location string
-	var location = document.getElementById('pac-input').placeholder;
+	var location = document.getElementById('pac-input').value;
 
 	// Execute Google Places search
 	var request = {

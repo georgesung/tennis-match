@@ -47,12 +47,12 @@ app.controller('SummaryCtrl', function(currentMatch) {
 	summary.showReqMatch = function(match) {
 		window.location.href = '#/req_match';
 	};
-	/*
+	
 	summary.showConfMatch = function(match) {
 		currentMatch.set(match);
 		window.location.href = '#/conf_match';
 	};
-	*/
+	
 	summary.showPendMatch = function(match) {
 		currentMatch.set(match);
 		window.location.href = '#/pend_match';
