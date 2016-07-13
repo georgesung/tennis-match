@@ -1,18 +1,3 @@
-'use strict';
-
-// Any Google API functionality must be executed -after- the gapi is loaded, thus it's placed in a callback
-function onGapiLoad() {
-	// Check Google OAuth
-	gapi.auth.authorize({client_id: CLIENT_ID, scope: SCOPES, immediate: true}, handleAuthResult);
-}
-
-function handleAuthResult(authResult) {
-	if (!(authResult && !authResult.error)) {
-		// If user is not authorized, redirect to login page
-		window.location = '/login';
-	}
-}
-
 // Code for Google Maps API and Google Places Search
 // Code below based on:
 // https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
@@ -77,6 +62,10 @@ $('#back-button').click(function() {
 	window.location.href = '/dashboard';
 });
 
+
+// TODO: Redo form validation
+
+/*
 // Validate the form, set up form submit handler (function called when submit-type button is pressed)
 $('#req-match-form').validate({
 	rules: {
@@ -93,7 +82,7 @@ $('#req-match-form').validate({
 	},
 	submitHandler: submitHandler,
 });
-
+*/
 function submitHandler() {
 	// First, disable all inputs while match request is in process
 	$('.container :input, select, button').attr('disabled', true);

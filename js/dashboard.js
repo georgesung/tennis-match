@@ -16,9 +16,10 @@ var app = angular.module('dashboard', ['ngRoute']);
 
 app.config(['$routeProvider', function($routeProvider) {
 	$routeProvider
-		.when('/' , {templateUrl: '/templates/summary.html', controller: 'SummaryCtrl as summary'})
-		.when('/pend_match' , {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
-		.when('/avail_match' , {templateUrl: '/templates/avail_match.html', controller: 'MatchCtrl as match'})
+		.when('/',              {templateUrl: '/templates/summary.html', controller: 'SummaryCtrl as summary'})
+		.when('/req_match',     {templateUrl: '/templates/req_match.html', controller: 'ReqCtrl as req'})
+		.when('/pend_match',    {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
+		.when('/avail_match',   {templateUrl: '/templates/avail_match.html', controller: 'MatchCtrl as match'})
 		.otherwise({redirectTo:'/'});
 }]);
 
@@ -26,14 +27,9 @@ app.config(['$routeProvider', function($routeProvider) {
 app.factory('currentMatch', function() {
 	var myMatch = new Match(true, 'a', 'b', 'c', 'd', false);
 
-	function set(match) {
-		myMatch = match;
-	}
-
-	function get() {
-		return myMatch;
-	}
-
+	// Boilerplate code
+	function set(match) { myMatch = match; }
+	function get() { return myMatch; }
 	return {
 		set: set,
 		get: get
@@ -47,6 +43,16 @@ app.controller('SummaryCtrl', function(currentMatch) {
 	summary.pendingMatches = [];
 	summary.availableMatches = [];
 
+	// These functions get called on corresponding button clicks
+	summary.showReqMatch = function(match) {
+		window.location.href = '#/req_match';
+	};
+	/*
+	summary.showConfMatch = function(match) {
+		currentMatch.set(match);
+		window.location.href = '#/conf_match';
+	};
+	*/
 	summary.showPendMatch = function(match) {
 		currentMatch.set(match);
 		window.location.href = '#/pend_match';
@@ -56,6 +62,58 @@ app.controller('SummaryCtrl', function(currentMatch) {
 		currentMatch.set(match);
 		window.location.href = '#/avail_match';
 	};
+});
+
+app.controller('ReqCtrl', function() {
+	var req = this;
+
+	// Regex for form validation
+	req.datePattern = '[0-9]{2}/[0-9]{2}/[0-9]{4}';
+	req.timePattern = '[0-9]{2}:[0-9]{2}';
+
+	req.submitForm = function(isValid) {
+		if (isValid) {
+			// First, disable all inputs while match request is in process
+			$('.container :input, select, button').attr('disabled', true);
+
+			// Read values from form
+			var singlesDoubles = $('#singles-doubles').val();
+			var date           = $('#date').val();
+			var time           = $('#time').val();
+			var location       = $('#pac-input').val();
+
+			// Convert singlesDoubles to boolean
+			var singles = singlesDoubles=='singles' ? true : false;
+
+			var match = {
+				'singles':   singles,
+				'date':      date,
+				'time':      time,
+				'location':  location,
+				'players':   [],     // back-end will set default value
+				'confirmed': false,  // ditto
+				'ntrp':      0.0,    // ditto
+			};
+
+			// Call back-end API
+			gapi.client.tennis.createMatch(match).
+				execute(function(resp) {
+					bootbox.dialog({
+						closeButton: false,
+						message: "Match request successful",
+						buttons: {
+							ok: {
+								label: "OK",
+								className: "btn-default",
+								callback: function() {
+									window.location.href = '/dashboard';
+								}
+							}
+						}
+					});
+				});
+		}
+	}
 });
 
 app.controller('MatchCtrl', function(currentMatch) {
@@ -159,22 +217,3 @@ function handleAuthResult(authResult) {
 		window.location = '/login';
 	}
 }
-
-/*
-// On-click handlers
-$('#req-button').click(function() {
-	window.location.href = '/req_match';
-});
-
-$('.conf-match').click(function() {
-	window.location.href = '/conf_match';
-});
-
-$('.pend-match').click(function() {
-	window.location.href = '/pend_match';
-});
-
-$('.avail-match').click(function() {
-	window.location.href = '/avail_match';
-});
-*/
