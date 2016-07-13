@@ -62,8 +62,6 @@ $('#play-button').click(function() {
 
 	// Call back-end API to (attempt to) join the match
 	gapi.client.tennis.joinMatch(matchKey).execute(function(resp) {
-		console.log(resp.data);
-
 		var resultMsg = '';
 		if (resp.data) {
 			resultMsg = 'Successfully joined the match!'

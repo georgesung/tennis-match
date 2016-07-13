@@ -64,10 +64,14 @@ class TennisApi(remote.Service):
 		profile_key = ndb.Key(Profile, user_id)
 		profile = profile_key.get()
 
+		# Normalize NTRP if needed
+		if profile.gender == 'f':
+			ntrp = profile.ntrp - 0.5
+
 		# Add default values for those missing
 		data['players']   = [user_id]
 		data['confirmed'] = False
-		data['ntrp']      = profile.ntrp
+		data['ntrp']      = ntrp
 
 		# Convert date/time from string to datetime object
 		dt_string = data['date'] + '|' + data['time']
@@ -143,12 +147,70 @@ class TennisApi(remote.Service):
 
 		return status
 
-
 	@endpoints.method(StringMsg, BooleanMsg, path='',
 		http_method='POST', name='joinMatch')
 	def joinMatch(self, request):
 		"""Join an available Match, given Match's key"""
 		return self._joinMatch(request)
+
+
+	@ndb.transactional(xg=True)
+	def _cancelMatch(self, request):
+		"""Cancel an existing Match, given Match's key.
+		If successful, return true. Fail condition?"""
+
+		# Preload necessary data items
+		user = endpoints.get_current_user()
+		if not user:
+			raise endpoints.UnauthorizedException('Authorization required')
+		user_id = user.email()
+
+		# If any field in request is None, then raise exception
+		if request.data is None:
+			raise endpoints.BadRequestException('Need match ID from request.data')
+
+		# Get match key, then get the Match entity from db
+		match_key = request.data
+		match = ndb.Key(urlsafe=match_key).get()
+
+		# If cancelling player is the "owner" of the match and match has >1 player,
+		# find new owner to update Match's ntrp
+		if match.players[0] == user_id and len(match.players) > 1:
+			new_owner = ndb.Key(Profile, match.players[1]).get()
+
+			ntrp = new_owner.ntrp
+			if new_owner.gender == 'f':
+				ntrp -= 0.5
+
+			match.ntrp = ntrp
+
+		# Update 'players' and 'confirmed' fields (if needed)
+		match.players.remove(user_id)
+		match.confirmed = False
+
+		# Update Match in ndb
+		if len(match.players) == 0:
+			match.key.delete()
+		else:
+			match.put()
+
+		# Remove current match key from current user's matches list
+		profile_key = ndb.Key(Profile, user.email())
+		profile = profile_key.get()
+		profile.matches.remove(match_key)
+		profile.put()
+
+		# Return true, for success (how can it fail?)
+		status = BooleanMsg()
+		status.data = True
+
+		return status
+
+	@endpoints.method(StringMsg, BooleanMsg, path='',
+		http_method='POST', name='cancelMatch')
+	def cancelMatch(self, request):
+		"""Cancel an existing Match, given Match's key"""
+		return self._cancelMatch(request)
 
 
 	###################################################################
@@ -242,6 +304,12 @@ class TennisApi(remote.Service):
 		# For each match is user's matches, add the info to match_msg
 		for match_key in profile.matches:
 			match = ndb.Key(urlsafe=match_key).get()
+
+			# Ignore matches in the past, or matches that will occur in less than 30 minutes
+			# Note we store matches in naive time, but datetime.now() returns UTC time,
+			# so we use tzinfo object to convert to local time
+			if match.dateTime - timedelta(minutes=30) < datetime.now(Eastern_tzinfo()).replace(tzinfo=None):
+				continue
 
 			# Convert datetime object into separate date and time strings
 			date, time = match.dateTime.strftime('%m/%d/%Y|%H:%M').split('|')

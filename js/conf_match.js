@@ -61,15 +61,38 @@ $('#cancel-button').click(function() {
 				label: "Yes",
 				className: "btn-primary",
 				callback: function() {
-					console.log("yes!");
-				}
+					// Cancel the match, specify the match key to back-end
+
+					// Get current match key, create the string message to back-end API
+					var $scope = $('#dashboard').scope();
+					var matchKey = {data: $scope.match.currentMatch.key};
+
+					// Call back-end API to (attempt to) join the match
+					gapi.client.tennis.cancelMatch(matchKey).execute(function(resp) {
+						var resultMsg = '';
+						if (resp.data) {
+							resultMsg = 'Successfully left the match'
+						} else {
+							resultMsg = 'Something went wrong, please retry'
+						}
+						bootbox.dialog({
+							closeButton: false,
+							message: resultMsg,
+							buttons: {
+								ok: {
+									label: "OK",
+									className: "btn-default",
+									callback: function() {
+										window.location.href = '/dashboard';
+									}
+								}
+							}
+						});
+					});				}
 			},
 			no: {
 				label: "No",
-				className: "btn-default",
-				callback: function() {
-					console.log("no~");
-				}
+				className: "btn-default"
 			}
 		}
 	});

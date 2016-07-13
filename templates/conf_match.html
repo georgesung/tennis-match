@@ -14,7 +14,7 @@
 			<button type="button" class="btn btn-default btn-sm" id="back-button">Back</button>
 		</div>
 		<div class="col-xs-6 text-right">
-			<button type="button" class="btn btn-danger btn-sm" id="cancel-button">Cancel Match</button>
+			<button type="button" class="btn btn-danger btn-sm" id="cancel-button">Cancel/Leave Match</button>
 		</div>
 	</div>
 	<div class="row">
@@ -28,7 +28,7 @@
 			<form onsubmit="return false">
 
 				<fieldset class="form-group">
-					<label>Player<span ng-if="!match.currentMatch.singles">s</span></label>
+					<label>Players</label>
 					<textarea class="form-control" rows="3" wrap readonly>{{match.currentMatch.players}}</textarea>
 				</fieldset>
 
