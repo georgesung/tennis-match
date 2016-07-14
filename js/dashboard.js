@@ -27,7 +27,7 @@ app.config(['$routeProvider', function($routeProvider) {
 
 // "Global variable"/service to store current match to view details of it
 app.factory('currentMatch', function() {
-	var myMatch = new Match(true, 'a', 'b', 'c', 'd', false);
+	var myMatch = new Match(true, '-', '-', '-', '-', false, '-');
 
 	// Boilerplate code
 	function set(match) { myMatch = match; }

@@ -32,13 +32,12 @@ class ProfileMsg(messages.Message):
 
 # Match object, and its messages
 class Match(ndb.Model):
-	# TODO: Ancestor?
 	singles   = ndb.BooleanProperty(required=True)
 	dateTime  = ndb.DateTimeProperty(required=True)  # naive time, no time zone info, assuming "local" timezone
 	location  = ndb.StringProperty(required=True)  # no need for GeoPtProperty
 	players   = ndb.StringProperty(repeated=True)  # userIds
 	confirmed = ndb.BooleanProperty(required=True)
-	ntrp      = ndb.FloatProperty(required=True)  # NTRP rating of creator of match, standardized to male rating
+	ntrp      = ndb.FloatProperty(required=True)  # NTRP rating of owner of match, standardized to male rating
 
 class MatchMsg(messages.Message):
 	singles   = messages.BooleanField(1)

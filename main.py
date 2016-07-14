@@ -287,6 +287,42 @@ class TennisApi(remote.Service):
 	# Queries
 	###################################################################
 
+	def _appendMatchesMsg(self, match, matches_msg):
+		# Ignore matches in the past, or matches that will occur in less than 30 minutes
+		# Note we store matches in naive time, but datetime.now() returns UTC time,
+		# so we use tzinfo object to convert to local time
+		if match.dateTime - timedelta(minutes=30) < datetime.now(Eastern_tzinfo()).replace(tzinfo=None):
+			return
+
+		# Convert datetime object into separate date and time strings
+		date, time = match.dateTime.strftime('%m/%d/%Y|%H:%M').split('|')
+
+		# Convert match.players into pipe-separated 'firstName lastName' string
+		# e.g. ['Bob Smith|John Doe|Alice Wonderland|Foo Bar', 'Blah Blah|Hello World']
+		players = ''
+		for player_id in match.players:
+			player_profile = ndb.Key(Profile, player_id).get()
+
+			first_name  = player_profile.firstName
+			last_name   = player_profile.lastName
+			ntrp        = player_profile.ntrp
+			gender      = player_profile.gender.capitalize()
+
+			players += first_name + ' ' + last_name + ' (' + str(ntrp) + gender + '), '
+		players = players.rstrip(', ')
+
+		# Populate fields in matches_msg
+		matches_msg.singles.append(match.singles)
+		matches_msg.date.append(date)
+		matches_msg.time.append(time)
+		matches_msg.location.append(match.location)
+		matches_msg.players.append(players)
+		matches_msg.confirmed.append(match.confirmed)
+		matches_msg.key.append(match.key.urlsafe())
+
+		# No need to return anything, matches_msg is a reference, so you modified the original thing
+
+
 	@endpoints.method(message_types.VoidMessage, MatchesMsg,
 			path='', http_method='GET', name='getMyMatches')
 	def getMyMatches(self, request):
@@ -306,35 +342,7 @@ class TennisApi(remote.Service):
 		for match_key in profile.matches:
 			match = ndb.Key(urlsafe=match_key).get()
 
-			# Ignore matches in the past, or matches that will occur in less than 30 minutes
-			# Note we store matches in naive time, but datetime.now() returns UTC time,
-			# so we use tzinfo object to convert to local time
-			if match.dateTime - timedelta(minutes=30) < datetime.now(Eastern_tzinfo()).replace(tzinfo=None):
-				continue
-
-			# Convert datetime object into separate date and time strings
-			date, time = match.dateTime.strftime('%m/%d/%Y|%H:%M').split('|')
-
-			# Convert match.players into pipe-separated 'firstName lastName' string
-			# e.g. ['Bob Smith|John Doe|Alice Wonderland|Foo Bar', 'Blah Blah|Hello World']
-			players = ''
-			for player_id in match.players:
-				player_profile = ndb.Key(Profile, player_id).get()
-
-				first_name = player_profile.firstName
-				last_name = player_profile.lastName
-
-				players += first_name + ' ' + last_name + '|'
-			players = players.rstrip('|')
-
-			# Populate fields in matches_msg
-			matches_msg.singles.append(match.singles)
-			matches_msg.date.append(date)
-			matches_msg.time.append(time)
-			matches_msg.location.append(match.location)
-			matches_msg.players.append(players)
-			matches_msg.confirmed.append(match.confirmed)
-			matches_msg.key.append(match_key)
+			self._appendMatchesMsg(match, matches_msg)
 
 		return matches_msg
 
@@ -370,35 +378,7 @@ class TennisApi(remote.Service):
 			if profile.userId in match.players:
 				continue
 
-			# Ignore matches in the past, or matches that will occur in less than 30 minutes
-			# Note we store matches in naive time, but datetime.now() returns UTC time,
-			# so we use tzinfo object to convert to local time
-			if match.dateTime - timedelta(minutes=30) < datetime.now(Eastern_tzinfo()).replace(tzinfo=None):
-				continue
-
-			# Convert datetime object into separate date and time strings
-			date, time = match.dateTime.strftime('%m/%d/%Y|%H:%M').split('|')
-
-			# Convert match.players into pipe-separated 'firstName lastName' string
-			# e.g. ['Bob Smith|John Doe|Alice Wonderland|Foo Bar', 'Blah Blah|Hello World']
-			players = ''
-			for player_id in match.players:
-				player_profile = ndb.Key(Profile, player_id).get()
-
-				first_name = player_profile.firstName
-				last_name = player_profile.lastName
-
-				players += first_name + ' ' + last_name + '|'
-			players = players.rstrip('|')
-
-			# Populate fields in matches_msg
-			matches_msg.singles.append(match.singles)
-			matches_msg.date.append(date)
-			matches_msg.time.append(time)
-			matches_msg.location.append(match.location)
-			matches_msg.players.append(players)
-			matches_msg.confirmed.append(match.confirmed)
-			matches_msg.key.append(match.key.urlsafe())
+			self._appendMatchesMsg(match, matches_msg)
 
 		return matches_msg
 
