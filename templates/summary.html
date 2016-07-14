@@ -5,10 +5,6 @@
 <!-- My own css -->
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 
-<!-- Bootstrap Toggle button: http://www.bootstraptoggle.com -->
-<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
 <div class="container">
 
 	<div class="row">
@@ -36,8 +32,14 @@
 	<div class="row">
 		<div class="col-sm-12">
 		<i><small>Select singles/doubles:</small></i><br>
-		<input type="checkbox" data-toggle="toggle" data-on="Doubles" data-off="Singles"
-			data-onstyle="default" data-offstyle="default" data-size="mini">
+		<form role="form">
+			<label class="radio-inline">
+				<input type="radio" value="singles" ng-model="summary.singlesDoubles" ng-click="summary.filterMatches()">Singles
+			</label>
+			<label class="radio-inline">
+				<input type="radio" value="doubles" ng-model="summary.singlesDoubles" ng-click="summary.filterMatches()">Doubles
+			</label>
+		</form>
 		</div>
 	</div>
 
@@ -59,7 +61,7 @@
 
 	<div class="row"><div class="col-sm-12" id="pend-matches">
 		<h5><b>Pending Matches</b></h5>
-		<div class="row match-info pend-match" ng-repeat="match in summary.pendingMatches" ng-click="summary.showPendMatch(match)">
+		<div class="row match-info pend-match" ng-repeat="match in summary.pendingMatchesFiltered" ng-click="summary.showPendMatch(match)">
 			<div class="col-sm-6">
 				<div>{{match.location}}</div>
 			</div>
@@ -67,12 +69,12 @@
 				<div>{{match.date}} - {{match.time}}</div>
 			</div>
 		</div>
-		<i ng-if="summary.pendingMatches.length == 0">none</i>
+		<i ng-if="summary.pendingMatchesFiltered.length == 0">none</i>
 	</div></div>
 
 	<div class="row"><div class="col-sm-12">
 		<h5><b>Available Matches</b></h5>
-		<div class="row match-info conf-match" ng-repeat="match in summary.availableMatches" ng-click="summary.showAvailMatch(match)">
+		<div class="row match-info conf-match" ng-repeat="match in summary.availableMatchesFiltered" ng-click="summary.showAvailMatch(match)">
 			<div class="col-sm-4">
 				<div>{{match.players}}</div>
 			</div>
@@ -83,7 +85,7 @@
 				<div>{{match.date}} - {{match.time}}</div>
 			</div>
 		</div>
-		<i ng-if="summary.availableMatches.length == 0">none</i>
+		<i ng-if="summary.availableMatchesFiltered.length == 0">none</i>
 	</div></div>
 
 </div>

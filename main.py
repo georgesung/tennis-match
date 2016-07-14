@@ -65,6 +65,7 @@ class TennisApi(remote.Service):
 		profile = profile_key.get()
 
 		# Normalize NTRP if needed
+		ntrp = profile.ntrp
 		if profile.gender == 'f':
 			ntrp = profile.ntrp - 0.5
 

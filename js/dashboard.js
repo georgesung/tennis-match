@@ -44,17 +44,41 @@ app.controller('SummaryCtrl', function(currentMatch) {
 	summary.confirmedMatches = [];
 	summary.pendingMatches = [];
 	summary.availableMatches = [];
+	summary.pendingMatchesFiltered = [];
+	summary.availableMatchesFiltered = [];
+	summary.singlesDoubles = 'singles';
+
+	// Filters matches, only show filtered ones
+	summary.filterMatches = function() {
+		// Only filter pending and available matches, want to see all confirmed matches
+		// BOZO: Only singles/doubles filter for now. Maybe time/location filter later.
+		summary.pendingMatchesFiltered = [];
+		summary.availableMatchesFiltered = [];
+		var singles = (summary.singlesDoubles == 'singles');
+
+		for (var i = 0; i < summary.pendingMatches.length; i++) {
+			if (summary.pendingMatches[i].singles == singles) {
+				summary.pendingMatchesFiltered.push(summary.pendingMatches[i]);
+			}
+		}
+
+		for (var i = 0; i < summary.availableMatches.length; i++) {
+			if (summary.availableMatches[i].singles == singles) {
+				summary.availableMatchesFiltered.push(summary.availableMatches[i]);
+			}
+		}
+	};
 
 	// These functions get called on corresponding button clicks
 	summary.showReqMatch = function(match) {
 		window.location.href = '#/req_match';
 	};
-	
+
 	summary.showConfMatch = function(match) {
 		currentMatch.set(match);
 		window.location.href = '#/conf_match';
 	};
-	
+
 	summary.showPendMatch = function(match) {
 		currentMatch.set(match);
 		window.location.href = '#/pend_match';
@@ -182,6 +206,8 @@ function handleAuthResult(authResult) {
 			$scope.$apply(function () {
 				$scope.summary.confirmedMatches = confirmedMatches;
 				$scope.summary.pendingMatches = pendingMatches;
+
+				$scope.summary.filterMatches();
 			});
 		});
 
@@ -213,6 +239,8 @@ function handleAuthResult(authResult) {
 			// Point to the availableMatches in the controller
 			$scope.$apply(function () {
 				$scope.summary.availableMatches = availableMatches;
+
+				$scope.summary.filterMatches();
 			});
 		});
 
