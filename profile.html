@@ -7,6 +7,10 @@
 		<!-- Include jQuery -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
+		<!-- Include AngularJS -->
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular-route.min.js"></script>
+
 		<!-- Using Bootstrap CDN to include Bootstrap -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
@@ -20,8 +24,8 @@
 
 		<title>Update Profile</title>
 	</head>
-	<body>
-		<div class="container">
+	<body ng-app="profile">
+		<div class="container" id="profile" ng-controller="ProfCtrl as prof">
 			<div class="row">
 				<div class="col-md-12">
 					<h4>Update Profile</h4>
@@ -29,40 +33,44 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<form id="profile-form" onsubmit="return false">
+					<form id="profForm" name="profForm" ng-submit="prof.submitForm(profForm.$valid)" novalidate>
 
 						<fieldset class="form-group">
 							<label>Account Email</label>
-							<input type="email" class="form-control" id="account-email" placeholder="Email" readonly>
+							<input type="email" class="form-control" id="account-email" ng-model="prof.userId" placeholder="Email" readonly>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label> Contact Email</label>
-							<input type="email" class="form-control" id="contact-email" name="email" placeholder="Email" required>
+							<input type="email" class="form-control" id="contact-email" name="email" ng-model="prof.email" placeholder="Email" required>
+							<p ng-show="profForm.email.$invalid && !profForm.email.$pristine" class="help-block">Valid email is required</p>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>First Name</label>
-							<input type="text" class="form-control" id="first-name" name="firstName" placeholder="First Name" required>
+							<input type="text" class="form-control" id="first-name" name="firstName" ng-model="prof.firstName" placeholder="First Name" required>
+							<p ng-show="profForm.firstName.$invalid && !profForm.firstName.$pristine" class="help-block">First name is required</p>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>Last Name</label>
-							<input type="text" class="form-control" id="last-name" name="lastName" placeholder="Last Name" required>
+							<input type="text" class="form-control" id="last-name" name="lastName" ng-model="prof.lastName" placeholder="Last Name" required>
+							<p ng-show="profForm.lastName.$invalid && !profForm.lastName.$pristine" class="help-block">Last name is required</p>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>Gender</label>
-							<select class="form-control" id="gender">
+							<select class="form-control" id="gender" name="gender" ng-model="prof.gender" required>
 								<option value="m">M</option>
 								<option value="f">F</option>
 							</select>
+							<p ng-show="profForm.gender.$invalid && !profForm.gender.$pristine" class="help-block">Gender is required</p>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>NTRP Rating</label>
 							<br>
-							<input id="ntrp" type="text"
+							<input id="ntrp" name="ntrp" type="text" ng-model="prof.ntrp" required
 								data-provide="slider"
 								data-slider-ticks="[2.5, 3.0, 3.5, 4.0, 4.50, 5.0]"
 								data-slider-ticks-labels='["2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]'
@@ -70,16 +78,16 @@
 								data-slider-value="3.5"
 								data-slider-selection="none"
 								data-slider-tooltip="hide" />
- 						</fieldset>
+							<p ng-show="profForm.ntrp.$invalid && !profForm.ntrp.$pristine" class="help-block">NTRP rating is required</p>
+							</fieldset>
 
-						<button type="submit" class="btn btn-primary" id="update-profile">Update Profile</button>
+						<button type="submit" class="btn btn-primary" id="update-profile" ng-disabled="profForm.$invalid">Update Profile</button>
 						<button type="button" class="btn btn-default" id="cancel">Cancel</button>
 					</form>
 				</div>
 			</div>
 		</div>
 
-		<script src="/js/jquery.validate.min.js"></script>
 		<script src="/js/settings.js"></script>
 		<script src="/js/profile.js"></script>
 
