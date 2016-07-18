@@ -14,8 +14,3 @@ indexes:
   properties:
   - name: ntrp
   - name: dateTime
-
-- kind: Match
-  properties:
-  - name: ntrp
-  - name: players

@@ -14,7 +14,7 @@ import datetime
 # User profile, and its messages
 class Profile(ndb.Model):
 	userId        = ndb.StringProperty(required=True)
-	contactEmail  = ndb.StringProperty()
+	contactEmail  = ndb.StringProperty(default='')
 	firstName     = ndb.StringProperty(default='')
 	lastName      = ndb.StringProperty(default='')
 	gender        = ndb.StringProperty(default='m')  # m/f
@@ -28,6 +28,7 @@ class ProfileMsg(messages.Message):
 	lastName      = messages.StringField(4)
 	gender        = messages.StringField(5)  # m/f
 	ntrp          = messages.FloatField(6)
+	accessToken   = messages.StringField(7)
 
 
 # Match object, and its messages
@@ -47,6 +48,7 @@ class MatchMsg(messages.Message):
 	players   = messages.StringField(5, repeated=True)  # user 'firstName lastName' (*not* userId)
 	confirmed = messages.BooleanField(6)
 	ntrp      = messages.FloatField(7)
+	accessToken = messages.StringField(8)
 
 # Represents multiple matches
 # Each entry in 'players' field is pipe-separated name string, e.g.
@@ -59,10 +61,17 @@ class MatchesMsg(messages.Message):
 	players    = messages.StringField(5, repeated=True)
 	confirmed  = messages.BooleanField(6, repeated=True)
 	key        = messages.StringField(7, repeated=True)  # ndb key for each Match entity
+	accessToken = messages.StringField(8)
 
 # Generic data messages
 class BooleanMsg(messages.Message):
 	data = messages.BooleanField(1)
+	accessToken = messages.StringField(2)
 
 class StringMsg(messages.Message):
 	data = messages.StringField(1)
+	accessToken = messages.StringField(2)
+
+# Access token message
+class AccessTokenMsg(messages.Message):
+	accessToken = messages.StringField(1)

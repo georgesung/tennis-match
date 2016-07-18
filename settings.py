@@ -1,1 +1,7 @@
-WEB_CLIENT_ID = '941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com'
+# Facebook
+FB_APP_ID = '1739379949638650'
+FB_APP_SECRET = 'secret'
+FB_API_VERSION = '2.7'
+
+# Google
+WEB_CLIENT_ID = 'secret'

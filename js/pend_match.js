@@ -61,11 +61,12 @@ $('#cancel-button').click(function() {
 				label: "Yes",
 				className: "btn-primary",
 				callback: function() {
-					// Cancel the match, specify the match key to back-end
+					/* Cancel the match, specify the match key to back-end */
+					var accessToken = getAccessTokenGlobal();  // OAuth access token
 
 					// Get current match key, create the string message to back-end API
 					var $scope = $('#dashboard').scope();
-					var matchKey = {data: $scope.match.currentMatch.key};
+					var matchKey = {data: $scope.match.currentMatch.key, accessToken: accessToken};
 
 					// Call back-end API to (attempt to) join the match
 					gapi.client.tennis.cancelMatch(matchKey).execute(function(resp) {

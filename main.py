@@ -23,7 +23,13 @@ from models import MatchMsg
 from models import MatchesMsg
 from models import StringMsg
 from models import BooleanMsg
+from models import AccessTokenMsg
 
+# Facebook
+from settings import FB_APP_ID
+from settings import FB_APP_SECRET
+from settings import FB_API_VERSION
+# Google
 from settings import WEB_CLIENT_ID
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
@@ -39,19 +45,160 @@ class TennisApi(remote.Service):
 	"""Tennis API"""
 
 	###################################################################
-	# Match objects
+	# Facebook Authentication
+	###################################################################
+
+	def _getUserId(self, token):
+		""" Given token, find FB user ID from FB, and return it """
+		url = 'https://graph.facebook.com/v%s/me?access_token=%s&fields=id' % (FB_API_VERSION, token)
+		try:
+			result = urlfetch.Fetch(url, method=1)
+		except:
+			print('urlfetch error2')
+			return None
+
+		data = json.loads(result.content)
+
+		if 'error' in data:
+			print('FB OAuth token error')
+			return None
+
+		user_id = 'fb_' + data['id']
+		
+		return user_id
+
+	@endpoints.method(StringMsg, StringMsg, path='',
+		http_method='POST', name='fbLogin')
+	def fbLogin(self, request):
+		""" Handle Facebook login """
+		status = StringMsg()  # return status message
+		status.data = 'error'  # default to error message, unless specified otherwise
+		'''
+		# Swap short-lived token for long-lived token
+		short_token = request.data
+
+		url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
+			FB_APP_ID, FB_APP_SECRET, short_token)
+		try:
+			result = urlfetch.Fetch(url, method=1)
+		except:
+			print('urlfetch error1')
+			return status
+
+		token = result.content.split('&')[0]  # 'access_token=blahblahblah'
+		'''
+		token = request.data
+
+		# Use token to get user info from API
+		url = 'https://graph.facebook.com/v%s/me?access_token=%s&fields=name,id,email' % (FB_API_VERSION, token)
+		try:
+			result = urlfetch.Fetch(url, method=1)
+		except:
+			print('urlfetch error2')
+			return status
+
+		data = json.loads(result.content)
+
+		if 'error' in data:
+			print('FB OAuth token error')
+			return status
+
+		user_id = 'fb_' + data['id']
+		first_name = data['name'].split()[0]
+		last_name = data['name'].split()[-1]
+		email = data['email']
+
+		# Get existing profile from datastore, or create new one
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# If profile already exists, return 'existing_user'
+		if profile:
+			status.data = 'existing_user'
+			return status
+
+		# Else, create new profile and return 'new_user'
+		profile = Profile(
+			key = profile_key,
+			userId = user_id,
+			contactEmail = email,
+			firstName = first_name,
+			lastName = last_name
+		)
+		profile.put()
+
+		status.data = 'new_user'
+		return status
+
+
+	###################################################################
+	# Profile Objects
+	###################################################################
+
+	def _copyProfileToForm(self, prof):
+		"""Copy relevant fields from Profile to ProfileMsg."""
+		pf = ProfileMsg()
+		for field in pf.all_fields():
+			if hasattr(prof, field.name):
+				setattr(pf, field.name, getattr(prof, field.name))
+		pf.check_initialized()
+		return pf
+
+	@endpoints.method(AccessTokenMsg, ProfileMsg,
+			path='', http_method='POST', name='getProfile')
+	def getProfile(self, request):
+		"""Return user profile."""
+		token = request.accessToken
+		user_id = self._getUserId(token)
+
+		# Create new ndb key based on unique user ID (email)
+		# Get profile from datastore -- if profile not found, then profile=None
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# If profile is empty, something is wrong
+		if not profile:
+			print('ERROR: User should have initial profile')
+
+		return self._copyProfileToForm(profile)
+
+	@endpoints.method(ProfileMsg, ProfileMsg,
+			path='', http_method='POST', name='updateProfile')
+	def updateProfile(self, request):
+		"""Update user profile."""
+		token = request.accessToken
+		user_id = self._getUserId(token)
+
+		# Make sure the incoming message is initialized, raise exception if not
+		request.check_initialized()
+
+		# Get existing profile from datastore
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# Update profile object from the user's form
+		for field in request.all_fields():
+			if field.name == 'userId':
+				setattr(profile, 'userId', user_id)
+			elif field.name != 'accessToken':
+				setattr(profile, field.name, getattr(request, field.name))
+
+		# Save updated profile to datastore
+		profile.put()
+
+		return self._copyProfileToForm(profile)
+
+
+	###################################################################
+	# Match Objects
 	###################################################################
 
 	@ndb.transactional(xg=True)
 	def _createMatch(self, request):
 		"""Create new Match, update user Profile to add new Match to Profile.
 		Returns MatchMsg/request."""
-
-		# Preload necessary data items
-		user = endpoints.get_current_user()
-		if not user:
-			raise endpoints.UnauthorizedException('Authorization required')
-		user_id = user.email()
+		token = request.accessToken
+		user_id = self._getUserId(token)
 
 		# If any field in request is None, then raise exception
 		if any([getattr(request, field.name) is None for field in request.all_fields()]):
@@ -59,6 +206,7 @@ class TennisApi(remote.Service):
 
 		# Copy MatchMsg/ProtoRPC Message into dict
 		data = {field.name: getattr(request, field.name) for field in request.all_fields()}
+		del data['accessToken']  # don't need this for match object
 
 		# Get user profile from NDB
 		profile_key = ndb.Key(Profile, user_id)
@@ -100,12 +248,8 @@ class TennisApi(remote.Service):
 	def _joinMatch(self, request):
 		"""Join an available Match, given Match's key.
 		If there is mid-air collision, return false. If successful, return true."""
-
-		# Preload necessary data items
-		user = endpoints.get_current_user()
-		if not user:
-			raise endpoints.UnauthorizedException('Authorization required')
-		user_id = user.email()
+		token = request.accessToken
+		user_id = self._getUserId(token)
 
 		# If any field in request is None, then raise exception
 		if request.data is None:
@@ -137,7 +281,7 @@ class TennisApi(remote.Service):
 		match.put()
 
 		# Add current match key to current user's matches list
-		profile_key = ndb.Key(Profile, user.email())
+		profile_key = ndb.Key(Profile, user_id)
 		profile = profile_key.get()
 		profile.matches.append(match_key)
 		profile.put()
@@ -159,12 +303,8 @@ class TennisApi(remote.Service):
 	def _cancelMatch(self, request):
 		"""Cancel an existing Match, given Match's key.
 		If successful, return true. Fail condition?"""
-
-		# Preload necessary data items
-		user = endpoints.get_current_user()
-		if not user:
-			raise endpoints.UnauthorizedException('Authorization required')
-		user_id = user.email()
+		token = request.accessToken
+		user_id = self._getUserId(token)
 
 		# If any field in request is None, then raise exception
 		if request.data is None:
@@ -196,7 +336,7 @@ class TennisApi(remote.Service):
 			match.put()
 
 		# Remove current match key from current user's matches list
-		profile_key = ndb.Key(Profile, user.email())
+		profile_key = ndb.Key(Profile, user_id)
 		profile = profile_key.get()
 		profile.matches.remove(match_key)
 		profile.put()
@@ -213,75 +353,6 @@ class TennisApi(remote.Service):
 		"""Cancel an existing Match, given Match's key"""
 		return self._cancelMatch(request)
 
-
-	###################################################################
-	# Profile objects
-	###################################################################
-
-	def _copyProfileToForm(self, prof):
-		"""Copy relevant fields from Profile to ProfileMsg."""
-		pf = ProfileMsg()
-		for field in pf.all_fields():
-			if hasattr(prof, field.name):
-				setattr(pf, field.name, getattr(prof, field.name))
-		pf.check_initialized()
-		return pf
-
-	@endpoints.method(message_types.VoidMessage, ProfileMsg,
-			path='', http_method='GET', name='getProfile')
-	def getProfile(self, request):
-		"""Return user profile."""
-		user = endpoints.get_current_user()
-
-		if not user:
-			raise endpoints.UnauthorizedException('Authorization required')
-
-		# Create new ndb key based on unique user ID (email)
-		# Get profile from datastore -- if profile not found, then profile=None
-		profile_key = ndb.Key(Profile, user.email())
-		profile = profile_key.get()
-
-		# Create placeholder empty profile if user does not have one, and put it in datastore
-		if not profile:
-			profile = Profile(
-				key = profile_key,
-				userId = user.email(),
-				contactEmail = user.email(),
-			)
-
-			profile.put()
-
-		return self._copyProfileToForm(profile)
-
-	@endpoints.method(ProfileMsg, ProfileMsg,
-			path='', http_method='POST', name='updateProfile')
-	def updateProfile(self, request):
-		"""Update user profile."""
-
-		# Ensure authentication
-		user = endpoints.get_current_user()
-		if not user:
-			raise endpoints.UnauthorizedException('Authorization required')
-
-		# Make sure the incoming message is initialized, raise exception if not
-		request.check_initialized()
-
-		# Get existing profile from datastore
-		profile_key = ndb.Key(Profile, user.email())
-		profile = profile_key.get()
-
-		# Update profile object from the user's form
-		for field in request.all_fields():
-			if field.name == 'userId':
-				setattr(profile, 'userId', user.email())
-			else:
-				#setattr(profile, field.name, str(getattr(request, field.name)))
-				setattr(profile, field.name, getattr(request, field.name))
-
-		# Save updated profile to datastore
-		profile.put()
-
-		return self._copyProfileToForm(profile)
 
 	###################################################################
 	# Queries
@@ -323,17 +394,15 @@ class TennisApi(remote.Service):
 		# No need to return anything, matches_msg is a reference, so you modified the original thing
 
 
-	@endpoints.method(message_types.VoidMessage, MatchesMsg,
-			path='', http_method='GET', name='getMyMatches')
+	@endpoints.method(AccessTokenMsg, MatchesMsg,
+			path='', http_method='POST', name='getMyMatches')
 	def getMyMatches(self, request):
 		"""Get all confirmed or pending matches for current user."""
-		user = endpoints.get_current_user()
-
-		if not user:
-			raise endpoints.UnauthorizedException('Authorization required')
+		token = request.accessToken
+		user_id = self._getUserId(token)
 
 		# Get user Profile based on userId (email)
-		profile = ndb.Key(Profile, user.email()).get()
+		profile = ndb.Key(Profile, user_id).get()
 
 		# Create new MatchesMsg message
 		matches_msg = MatchesMsg()
@@ -346,20 +415,18 @@ class TennisApi(remote.Service):
 
 		return matches_msg
 
-	@endpoints.method(message_types.VoidMessage, MatchesMsg,
-			path='', http_method='GET', name='getAvailableMatches')
+	@endpoints.method(AccessTokenMsg, MatchesMsg,
+			path='', http_method='POST', name='getAvailableMatches')
 	def getAvailableMatches(self, request):
 		"""
 		Get all available matches for current user.
 		Search through DB to find partners of similar skill.
 		"""
-		user = endpoints.get_current_user()
+		token = request.accessToken
+		user_id = self._getUserId(token)
 
-		if not user:
-			raise endpoints.UnauthorizedException('Authorization required')
-
-		# Get user Profile based on userId (email)
-		profile = ndb.Key(Profile, user.email()).get()
+		# Get user Profile based on userId
+		profile = ndb.Key(Profile, user_id).get()
 
 		# Create new MatchesMsg message
 		matches_msg = MatchesMsg()

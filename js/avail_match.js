@@ -54,11 +54,12 @@ $('#back-button').click(function() {
 });
 
 $('#play-button').click(function() {
-	// Join the match, specify the match key to back-end
+	/* Join the match, specify the match key to back-end */
+	var accessToken = getAccessTokenGlobal();  // OAuth access token
 
 	// Get current match key, create the string message to back-end API
 	var $scope = $('#dashboard').scope();
-	var matchKey = {data: $scope.match.currentMatch.key};
+	var matchKey = {data: $scope.match.currentMatch.key, accessToken: accessToken};
 
 	// Call back-end API to (attempt to) join the match
 	gapi.client.tennis.joinMatch(matchKey).execute(function(resp) {

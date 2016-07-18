@@ -36,12 +36,7 @@
 					<form id="profForm" name="profForm" ng-submit="prof.submitForm(profForm.$valid)" novalidate>
 
 						<fieldset class="form-group">
-							<label>Account Email</label>
-							<input type="email" class="form-control" id="account-email" ng-model="prof.userId" placeholder="Email" readonly>
-						</fieldset>
-
-						<fieldset class="form-group">
-							<label> Contact Email</label>
+							<label> Email</label>
 							<input type="email" class="form-control" id="contact-email" name="email" ng-model="prof.email" placeholder="Email" required>
 							<p ng-show="profForm.email.$invalid && !profForm.email.$pristine" class="help-block">Valid email is required</p>
 						</fieldset>
@@ -92,8 +87,8 @@
 		<script src="/js/profile.js"></script>
 
 		<!-- For Google sign-in -->
-		<script src="https://apis.google.com/js/platform.js" async defer></script>
-		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com">
+		<!--script src="https://apis.google.com/js/platform.js" async defer></script>
+		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com"-->
 
 		<!-- Google App Engine API -->
 		<script>

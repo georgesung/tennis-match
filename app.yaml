@@ -40,26 +40,6 @@ handlers:
   upload: profile\.html
   secure: always
 
-- url: /req_match
-  static_files: req_match.html
-  upload: req_match\.html
-  secure: always
-
-- url: /conf_match
-  static_files: conf_match.html
-  upload: conf_match\.html
-  secure: always
-
-- url: /pend_match
-  static_files: pend_match.html
-  upload: pend_match\.html
-  secure: always
-
-- url: /avail_match
-  static_files: avail_match.html
-  upload: avail_match\.html
-  secure: always
-
 - url: /_ah/spi/.*
   script: main.api
   secure: always

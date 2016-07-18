@@ -26,30 +26,39 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<h4>Please sign-in with your Google account, or create a new one</h4>
+					<h4>Please sign-in with your Facebook account</h4>
 					<br/>
 				</div>
 			</div>
-			<div class="row">
+			<!--div class="row">
 				<div class="col-md-12">
 					<div id="my-signin2" data-onsuccess="onSignIn"></div>
 					<br/>
+				</div>
+			</div-->
+			<div class="row">
+				<div class="col-md-12">
+					<fb:login-button scope="public_profile,email" onlogin="fbCheckLoginState();" size="xlarge">
+					</fb:login-button>
+
+					<div id="status">
+					</div>
 				</div>
 			</div>
 		</div>
 
 		<script src="/js/settings.js"></script>
 		<script src="/js/login.js"></script>
-		<script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
 
+		<!--script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script-->
 		<!-- For Google sign-in -->
-		<script src="https://apis.google.com/js/platform.js" async defer></script>
-		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com">
+		<!--script src="https://apis.google.com/js/platform.js" async defer></script>
+		<meta name="google-signin-client_id" content="941328784794-2uh490emqk4qqb1h1mu6ht0ehs7e81vn.apps.googleusercontent.com"-->
 
 		<!-- Google App Engine API -->
 		<script>
 		function init() {
-			gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
+			gapi.client.load('tennis', 'v1', null, '//' + window.location.host + '/_ah/api');
 			gapi.client.load('oauth2', 'v2', null);
 		};
 		</script>

@@ -5,6 +5,7 @@ var app = angular.module('profile', []);
 
 app.controller('ProfCtrl', function() {
 	var prof = this;
+	prof.accessToken = '';
 
 	prof.submitForm = function(isValid) {
 		if (isValid) {
@@ -19,12 +20,13 @@ app.controller('ProfCtrl', function() {
 			var ntrp          = parseFloat($('#ntrp').val());
 
 			var profile = {
-				'userId':        'read-from-backend',
+				'userId':        '',
 				'contactEmail':  contactEmail,
 				'firstName':     firstName,
 				'lastName':      lastName,
 				'gender':        gender,
 				'ntrp':          ntrp,
+				'accessToken':   prof.accessToken,
 			};
 
 			// Call back-end API
@@ -37,36 +39,37 @@ app.controller('ProfCtrl', function() {
 });
 
 
-// Any Google API functionality must be executed -after- the gapi is loaded, thus it's placed in a callback
+// Any back-end API functionality must be executed -after- the gapi is loaded
 function onGapiLoad() {
-	// Check Google OAuth
-	gapi.auth.authorize({client_id: CLIENT_ID, scope: SCOPES, immediate: true}, handleAuthResult);
-}
+	// Facebook authentication
+	FB.getLoginStatus(function(response) {
+		if (response.status === 'connected') {
+			// Authenticated
+			var accessToken = response.authResponse.accessToken;
 
-function handleAuthResult(authResult) {
-	if (authResult && !authResult.error) {
-		// If user is authorized, populate fields with user profile info
-		// Note userId == accountEmail
-		gapi.client.tennis.getProfile().
-			execute(function(resp) {
-				// Angular scope
-				var $scope = $('#profile').scope();
+			// If user is authorized, populate fields with user profile info
+			// Note userId == 'fb_' + facebook_id
+			gapi.client.tennis.getProfile({accessToken: accessToken}).
+				execute(function(resp) {
+					// Angular scope
+					var $scope = $('#profile').scope();
 
-				$scope.$apply(function () {
-					$scope.prof.userId = resp.result.userId;
-					$scope.prof.email = resp.result.contactEmail;
-					$scope.prof.firstName = resp.result.firstName;
-					$scope.prof.lastName = resp.result.lastName;
-					$scope.prof.gender = resp.result.gender;
-					$scope.prof.ntrp = resp.result.ntrp;
+					$scope.$apply(function () {
+						$scope.prof.accessToken = accessToken;
+						$scope.prof.email = resp.result.contactEmail;
+						$scope.prof.firstName = resp.result.firstName;
+						$scope.prof.lastName = resp.result.lastName;
+						$scope.prof.gender = resp.result.gender;
+						$scope.prof.ntrp = resp.result.ntrp;
+					});
+
+					$('#ntrp').slider().slider('setValue', resp.result.ntrp);
 				});
-
-				$('#ntrp').slider().slider('setValue', resp.result.ntrp);
-			});
-	} else {
-		// If user is not authorized, redirect to login page
-		window.location = '/login';
-	}
+		} else {
+			// Not authenticated, redirect to login page
+			window.location = '/login';
+		}
+	});
 }
 
 // Cancel button redirects to dashboard, and discards changes
