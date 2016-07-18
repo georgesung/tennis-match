@@ -191,7 +191,7 @@ function onGapiLoad() {
 
 			// Get all matches for current user, populate Confirmed Matches and Pending Matches
 			gapi.client.tennis.getMyMatches({accessToken: accessToken}).execute(function(resp) {
-				if ($.isEmptyObject(resp.result)) { return; }
+				if (resp.result.singles === undefined) { return; }
 
 				// The MatchesMsg message is stored in resp.result
 				// Go through all matches in the match "list" (see models.py for format)
@@ -230,7 +230,7 @@ function onGapiLoad() {
 
 			// Query all available matches for current user, populate Available Matches
 			gapi.client.tennis.getAvailableMatches({accessToken: accessToken}).execute(function(resp) {
-				if ($.isEmptyObject(resp.result)) { return; }
+				if (resp.result.singles === undefined) { return; }
 
 				// The MatchesMsg message is stored in resp.result
 				// Go through all matches in the match "list" (see models.py for format)
