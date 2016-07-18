@@ -14,14 +14,13 @@ function statusChangeCallback(response) {
 		// Call back-end API
 		gapi.client.tennis.fbLogin({data: accessToken}).execute(function(resp) {
 			var status = resp.result.data
-			console.log(status);
 
 			// If existing_user, redirect to dashboard
 			// Else (new_user), redirect to profile page to update his/her info
 			if (status == 'existing_user') {
-				console.log('im gonna redirect you to dashboard once its done');
+				window.location.href = '/dashboard';
 			} else {
-				console.log('redirect to profile page');
+				window.location.href = '/profile';
 			}
 		});
 	} else if (response.status === 'not_authorized') {
