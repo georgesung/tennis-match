@@ -50,7 +50,7 @@ function locSearchCallback(results, status) {
 
 // On-click handlers
 $('#back-button').click(function() {
-	window.location.href = '/dashboard';
+	window.location = '/';
 });
 
 $('#cancel-button').click(function() {
@@ -84,7 +84,7 @@ $('#cancel-button').click(function() {
 									label: "OK",
 									className: "btn-default",
 									callback: function() {
-										window.location.href = '/dashboard';
+										window.location = '/';
 									}
 								}
 							}

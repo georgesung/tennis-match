@@ -27,11 +27,6 @@ handlers:
   upload: dashboard\.html
   secure: always
 
-- url: /dashboard
-  static_files: dashboard.html
-  upload: dashboard\.html
-  secure: always
-
 - url: /login
   static_files: login.html
   upload: login\.html

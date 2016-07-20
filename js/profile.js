@@ -33,7 +33,7 @@ app.controller('ProfCtrl', function() {
 			// Call back-end API
 			gapi.client.tennis.updateProfile(profile).
 				execute(function(resp) {
-					window.location = '/dashboard';
+					window.location = '/';
 				});
 		}
 	}
@@ -80,5 +80,5 @@ function onGapiLoad() {
 
 // Cancel button redirects to dashboard, and discards changes
 $('#cancel').click(function() {
-	window.location.href = '/dashboard';
+	window.location = '/';
 });

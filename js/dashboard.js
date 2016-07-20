@@ -149,7 +149,7 @@ app.controller('ReqCtrl', function(accessToken) {
 								label: "OK",
 								className: "btn-default",
 								callback: function() {
-									window.location.href = '/dashboard';
+									window.location = '/';
 								}
 							}
 						}

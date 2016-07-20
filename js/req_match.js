@@ -59,5 +59,5 @@ function initAutocomplete() {
 
 // On-click handlers
 $('#back-button').click(function() {
-	window.location.href = '/dashboard';
+	window.location = '/';
 });

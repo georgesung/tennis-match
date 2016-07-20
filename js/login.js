@@ -18,7 +18,7 @@ function statusChangeCallback(response) {
 			// If existing_user, redirect to dashboard
 			// Else (new_user), redirect to profile page to update his/her info
 			if (status == 'existing_user') {
-				window.location.href = '/dashboard';
+				window.location = '/';
 			} else {
 				window.location.href = '/profile';
 			}
@@ -55,14 +55,14 @@ function onGapiLoad() {
 function handleAuthResult(authResult) {
 	// If user has already signed-in, redirect to dashboard
 	if (authResult && !authResult.error) {
-		//window.location.href = '/dashboard';
+		//window.location = '/';
 		console.log('hello');
 	}
 }
 
 // Google sign-in
 function onSuccess(googleUser) {
-	window.location.href = '/dashboard';
+	window.location = '/';
 }
 function onFailure(error) {
 	console.log('Google sign-in error!');
