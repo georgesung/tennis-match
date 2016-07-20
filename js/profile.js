@@ -55,21 +55,21 @@ function onGapiLoad() {
 					// If user is logged-out, redirect to login page
 					if (!resp.result.loggedIn) {
 						window.location = '/login';
+					} else {
+						// Angular scope
+						var $scope = $('#profile').scope();
+
+						$scope.$apply(function () {
+							$scope.prof.accessToken = accessToken;
+							$scope.prof.email = resp.result.contactEmail;
+							$scope.prof.firstName = resp.result.firstName;
+							$scope.prof.lastName = resp.result.lastName;
+							$scope.prof.gender = resp.result.gender;
+							$scope.prof.ntrp = resp.result.ntrp;
+						});
+
+						$('#ntrp').slider().slider('setValue', resp.result.ntrp);
 					}
-
-					// Angular scope
-					var $scope = $('#profile').scope();
-
-					$scope.$apply(function () {
-						$scope.prof.accessToken = accessToken;
-						$scope.prof.email = resp.result.contactEmail;
-						$scope.prof.firstName = resp.result.firstName;
-						$scope.prof.lastName = resp.result.lastName;
-						$scope.prof.gender = resp.result.gender;
-						$scope.prof.ntrp = resp.result.ntrp;
-					});
-
-					$('#ntrp').slider().slider('setValue', resp.result.ntrp);
 				});
 		} else {
 			// Not authenticated, redirect to login page

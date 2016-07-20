@@ -22,7 +22,7 @@ app.config(['$routeProvider', function($routeProvider) {
 		.when('/conf_match',    {templateUrl: '/templates/conf_match.html', controller: 'MatchCtrl as match'})
 		.when('/pend_match',    {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
 		.when('/avail_match',   {templateUrl: '/templates/avail_match.html', controller: 'MatchCtrl as match'})
-		.when('/faq',           {templateUrl: '/templates/faq.html'})
+		.when('/about',         {templateUrl: '/templates/about.html'})
 		.otherwise({redirectTo:'/'});
 }]);
 
@@ -52,6 +52,7 @@ app.factory('accessToken', function() {
 
 app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 	var summary = this;
+
 	summary.firstName = '';
 	summary.confirmedMatches = [];
 	summary.pendingMatches = [];
@@ -59,6 +60,8 @@ app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 	summary.pendingMatchesFiltered = [];
 	summary.availableMatchesFiltered = [];
 	summary.singlesDoubles = 'singles';
+
+	summary.showDashboard = false;
 
 	// Filters matches, only show filtered ones
 	summary.filterMatches = function() {
@@ -101,8 +104,8 @@ app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 		window.location = '#/avail_match';
 	};
 
-	summary.showFaq = function() {
-		window.location = '#/faq';
+	summary.showAbout = function() {
+		window.location = '#/about';
 	}
 
 	// Set access token from OAuth provider
@@ -112,9 +115,7 @@ app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 
 	// Log out user from session
 	summary.logout = function() {
-		var accessToken = accessToken.get();
-
-		gapi.client.tennis.fbLogout({accessToken: accessToken}).
+		gapi.client.tennis.fbLogout({accessToken: accessToken.get()}).
 			execute(function(resp) {
 				var status = resp.result.data;
 
@@ -206,14 +207,16 @@ function onGapiLoad() {
 			gapi.client.tennis.getProfile({accessToken: accessToken}).
 				execute(function(resp) {
 					// If user is logged-out, redirect to login page
+					// Else, update greeting
 					if (!resp.result.loggedIn) {
 						window.location = '/login';
+					} else {
+						// Show the dashboard, update greeting
+						$scope.$apply(function () {
+							$scope.summary.firstName = resp.result.firstName;
+							$scope.summary.showDashboard = true;
+						});
 					}
-
-					// Update greeting
-					$scope.$apply(function () {
-						$scope.summary.firstName = resp.result.firstName;
-					});
 				});
 
 			// Get all matches for current user, populate Confirmed Matches and Pending Matches
@@ -287,7 +290,6 @@ function onGapiLoad() {
 					$scope.summary.filterMatches();
 				});
 			});
-
 		} else {
 			// Not authenticated, redirect to login page
 			window.location = '/login';

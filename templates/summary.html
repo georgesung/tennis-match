@@ -5,7 +5,11 @@
 <!-- My own css -->
 <link rel="stylesheet" type="text/css" href="/css/style.css">
 
-<div class="container">
+<div class="container" ng-if="!summary.showDashboard">
+Please wait...
+</div>
+
+<div class="container" ng-if="summary.showDashboard">
 
 	<div class="row">
 		<div class="col-xs-6">
@@ -20,9 +24,9 @@
 				</button>
 				<ul class="dropdown-menu pull-right">
 					<li><a href="/profile">My Profile</a></li>
-					<li ng-click="summary.showFaq()">FAQ</li>
+					<li ng-click="summary.showAbout()"><a>About/FAQ</a></li>
 					<li role="separator" class="divider"></li>
-					<li ng-click="summary.logout()">Log Out</li>
+					<li ng-click="summary.logout()"><a>Log Out</a></li>
 				</ul>
 			</div>
 		</div>

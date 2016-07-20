@@ -1,0 +1,52 @@
+<!-- Using Bootstrap CDN to include Bootstrap -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+<!-- My own css -->
+<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+<div class="container">
+	<div class="row">
+		<div class="col-xs-12">
+			<button type="button" class="btn btn-default btn-sm" id="back-button">Back</button>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<h4>About</h4>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			This web app helps users find tennis partners of similar skill level, at a mutually agreeable time and place.
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-12">
+			<h4>FAQ</h4>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<b>Q: How are player skill levels determined?</b><br>
+			A: Each player fills-in his/her own "NTRP" skill level when joining. For more details on NTRP skill level, <a href="https://www.usta.com/Adult-Tennis/USTA-League/ntrp/">click here.</a><br><br>
+
+			<b>Q: How are players matched according to NTRP?</b><br>
+			A: Players are considered "similar skill" if their NTRP ratings are within 0.5 of each other. For example, a 3.5 player can be matched with players in the 3.0 - 4.0 range.<br><br>
+
+			<b>Q: Are there gender differences for NTRP levels?</b><br>
+			A: Empirically, for a given NTRP level, men and women tend to be at different skill levels. For example, a 4.0 man generally plays at a different (higher) level than a 4.0 woman. For simplicity, we estimate this difference to be 0.5 NTRP, such that a 4.0 man will be equivalent to a 4.5 woman.<br><br>
+
+			For further questions please contact George Sung
+		</div>
+	</div>
+
+</div>
+
+<script>
+$('#back-button').click(function() {
+	window.location = '/';
+});
+</script>
