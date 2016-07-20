@@ -12,7 +12,7 @@ function statusChangeCallback(response) {
 		var accessToken = response.authResponse.accessToken;
 
 		// Call back-end API
-		gapi.client.tennis.fbLogin({data: accessToken}).execute(function(resp) {
+		gapi.client.tennis.fbLogin({accessToken: accessToken}).execute(function(resp) {
 			var status = resp.result.data
 
 			// If existing_user, redirect to dashboard
@@ -20,7 +20,7 @@ function statusChangeCallback(response) {
 			if (status == 'existing_user') {
 				window.location = '/';
 			} else {
-				window.location.href = '/profile';
+				window.location = '/profile';
 			}
 		});
 	} else if (response.status === 'not_authorized') {

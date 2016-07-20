@@ -22,6 +22,7 @@ app.config(['$routeProvider', function($routeProvider) {
 		.when('/conf_match',    {templateUrl: '/templates/conf_match.html', controller: 'MatchCtrl as match'})
 		.when('/pend_match',    {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
 		.when('/avail_match',   {templateUrl: '/templates/avail_match.html', controller: 'MatchCtrl as match'})
+		.when('/faq',           {templateUrl: '/templates/faq.html'})
 		.otherwise({redirectTo:'/'});
 }]);
 
@@ -82,27 +83,48 @@ app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 
 	// These functions get called on corresponding button clicks
 	summary.showReqMatch = function(match) {
-		window.location.href = '#/req_match';
+		window.location = '#/req_match';
 	};
 
 	summary.showConfMatch = function(match) {
 		currentMatch.set(match);
-		window.location.href = '#/conf_match';
+		window.location = '#/conf_match';
 	};
 
 	summary.showPendMatch = function(match) {
 		currentMatch.set(match);
-		window.location.href = '#/pend_match';
+		window.location = '#/pend_match';
 	};
 
 	summary.showAvailMatch = function(match) {
 		currentMatch.set(match);
-		window.location.href = '#/avail_match';
+		window.location = '#/avail_match';
 	};
+
+	summary.showFaq = function() {
+		window.location = '#/faq';
+	}
 
 	// Set access token from OAuth provider
 	summary.setAccessToken = function(token) {
 		accessToken.set(token);
+	}
+
+	// Log out user from session
+	summary.logout = function() {
+		var accessToken = accessToken.get();
+
+		gapi.client.tennis.fbLogout({accessToken: accessToken}).
+			execute(function(resp) {
+				var status = resp.result.data;
+
+				// If user is logged-out, redirect to login page
+				if (status) {
+					window.location = '/login';
+				} else {
+					console.log('Error while logging out');
+				}
+			});
 	}
 });
 

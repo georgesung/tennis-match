@@ -67,7 +67,7 @@ class TennisApi(remote.Service):
 
 		return user_id
 
-	@endpoints.method(StringMsg, StringMsg, path='',
+	@endpoints.method(AccessTokenMsg, StringMsg, path='',
 		http_method='POST', name='fbLogin')
 	def fbLogin(self, request):
 		""" Handle Facebook login """
@@ -87,7 +87,7 @@ class TennisApi(remote.Service):
 
 		token = result.content.split('&')[0]  # 'access_token=blahblahblah'
 		'''
-		token = request.data
+		token = request.accessToken
 
 		# Use token to get user info from API
 		url = 'https://graph.facebook.com/v%s/me?access_token=%s&fields=name,id,email' % (FB_API_VERSION, token)
@@ -136,7 +136,7 @@ class TennisApi(remote.Service):
 		status.data = 'new_user'
 		return status
 
-	@endpoints.method(StringMsg, BooleanMsg, path='',
+	@endpoints.method(AccessTokenMsg, BooleanMsg, path='',
 		http_method='POST', name='fbLogout')
 	def fbLogout(self, request):
 		""" For FB logins, perform logout """
@@ -144,7 +144,7 @@ class TennisApi(remote.Service):
 		status.data = False  # default to error (False)
 
 		# Get FB user ID
-		token = request.data
+		token = request.accessToken
 
 		# Use token to get user info from API
 		url = 'https://graph.facebook.com/v%s/me?access_token=%s&fields=id' % (FB_API_VERSION, token)

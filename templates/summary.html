@@ -19,11 +19,10 @@
 					<span class="sr-only">Toggle Dropdown</span>
 				</button>
 				<ul class="dropdown-menu pull-right">
-					<li><a href="#">Filter Available Matches</a></li>
 					<li><a href="/profile">My Profile</a></li>
-					<li><a href="#">FAQ</a></li>
+					<li ng-click="summary.showFaq()">FAQ</li>
 					<li role="separator" class="divider"></li>
-					<li><a href="#">Log Out</a></li>
+					<li ng-click="summary.logout()">Log Out</li>
 				</ul>
 			</div>
 		</div>
