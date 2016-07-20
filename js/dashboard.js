@@ -180,9 +180,14 @@ function onGapiLoad() {
 			// since it makes back-end API call to request match for current user
 			$scope.$apply(function () { $scope.summary.setAccessToken(accessToken); });
 
-			// Get Profile, update greeting on summary
+			// Get Profile, update greeting on summary (if logged in)
 			gapi.client.tennis.getProfile({accessToken: accessToken}).
 				execute(function(resp) {
+					// If user is logged-out, redirect to login page
+					if (!resp.result.loggedIn) {
+						window.location = '/login';
+					}
+
 					// Update greeting
 					$scope.$apply(function () {
 						$scope.summary.firstName = resp.result.firstName;

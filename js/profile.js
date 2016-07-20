@@ -27,12 +27,13 @@ app.controller('ProfCtrl', function() {
 				'gender':        gender,
 				'ntrp':          ntrp,
 				'accessToken':   prof.accessToken,
+				'loggedIn':      true,
 			};
 
 			// Call back-end API
 			gapi.client.tennis.updateProfile(profile).
 				execute(function(resp) {
-					window.location.href = '/dashboard';
+					window.location = '/dashboard';
 				});
 		}
 	}
@@ -47,10 +48,15 @@ function onGapiLoad() {
 			// Authenticated
 			var accessToken = response.authResponse.accessToken;
 
-			// If user is authorized, populate fields with user profile info
+			// If user is authorized, populate fields with user profile info (if logged in)
 			// Note userId == 'fb_' + facebook_id
 			gapi.client.tennis.getProfile({accessToken: accessToken}).
 				execute(function(resp) {
+					// If user is logged-out, redirect to login page
+					if (!resp.result.loggedIn) {
+						window.location = '/login';
+					}
+
 					// Angular scope
 					var $scope = $('#profile').scope();
 

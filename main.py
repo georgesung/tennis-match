@@ -45,7 +45,7 @@ class TennisApi(remote.Service):
 	"""Tennis API"""
 
 	###################################################################
-	# Facebook Authentication
+	# Facebook/OAuth Authentication
 	###################################################################
 
 	def _getUserId(self, token):
@@ -64,7 +64,7 @@ class TennisApi(remote.Service):
 			return None
 
 		user_id = 'fb_' + data['id']
-		
+
 		return user_id
 
 	@endpoints.method(StringMsg, StringMsg, path='',
@@ -114,6 +114,11 @@ class TennisApi(remote.Service):
 
 		# If profile already exists, return 'existing_user'
 		if profile:
+			# If user previously logged-out, update login status in NDB
+			if not profile.loggedIn:
+				profile.loggedIn = True
+				profile.put()
+
 			status.data = 'existing_user'
 			return status
 
@@ -123,11 +128,47 @@ class TennisApi(remote.Service):
 			userId = user_id,
 			contactEmail = email,
 			firstName = first_name,
-			lastName = last_name
+			lastName = last_name,
+			loggedIn = True
 		)
 		profile.put()
 
 		status.data = 'new_user'
+		return status
+
+	@endpoints.method(StringMsg, BooleanMsg, path='',
+		http_method='POST', name='fbLogout')
+	def fbLogout(self, request):
+		""" For FB logins, perform logout """
+		status = BooleanMsg()  # return status
+		status.data = False  # default to error (False)
+
+		# Get FB user ID
+		token = request.data
+
+		# Use token to get user info from API
+		url = 'https://graph.facebook.com/v%s/me?access_token=%s&fields=id' % (FB_API_VERSION, token)
+		try:
+			result = urlfetch.Fetch(url, method=1)
+		except:
+			print('urlfetch error2')
+			return status
+
+		data = json.loads(result.content)
+
+		if 'error' in data:
+			print('FB OAuth token error')
+			return status
+
+		user_id = 'fb_' + data['id']
+
+		# Get Profile from NDB, update login status
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+		profile.loggedIn = False
+		profile.put()
+
+		status.data = True
 		return status
 
 

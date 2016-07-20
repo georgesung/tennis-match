@@ -20,6 +20,7 @@ class Profile(ndb.Model):
 	gender        = ndb.StringProperty(default='m')  # m/f
 	ntrp          = ndb.FloatProperty(default=3.5)
 	matches       = ndb.StringProperty(repeated=True)  # match keys (store urlsafe version), dynamically changing
+	loggedIn      = ndb.BooleanProperty(default=False)
 
 class ProfileMsg(messages.Message):
 	userId        = messages.StringField(1)
@@ -29,6 +30,7 @@ class ProfileMsg(messages.Message):
 	gender        = messages.StringField(5)  # m/f
 	ntrp          = messages.FloatField(6)
 	accessToken   = messages.StringField(7)
+	loggedIn      = messages.BooleanField(8)
 
 
 # Match object, and its messages
