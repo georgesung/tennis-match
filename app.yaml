@@ -19,8 +19,8 @@ handlers:
   static_dir: img
 
 - url: /favicon\.ico
-  static_files: /img/favicon.ico
-  upload: /img/favicon\.ico
+  static_files: img/favicon.ico
+  upload: img/favicon\.ico
 
 - url: /
   static_files: dashboard.html
