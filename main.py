@@ -7,6 +7,7 @@ from datetime import timedelta
 from eastern_tzinfo import Eastern_tzinfo
 import json
 import os
+import urllib
 
 import endpoints
 from protorpc import messages
@@ -45,7 +46,7 @@ class TennisApi(remote.Service):
 	"""Tennis API"""
 
 	###################################################################
-	# Facebook/OAuth Authentication
+	# Facebook Authentication & Graph API
 	###################################################################
 
 	def _getUserId(self, token):
@@ -66,6 +67,39 @@ class TennisApi(remote.Service):
 		user_id = 'fb_' + data['id']
 
 		return user_id
+
+	def _postFbNotif(self, fb_user_id, message):
+		"""
+		Post FB notification with message to user
+		"""
+		# Get App Access Token, different than User Token
+		# https://developers.facebook.com/docs/facebook-login/access-tokens/#apptokens
+		url = 'https://graph.facebook.com/v%s/oauth/access_token?grant_type=client_credentials&client_id=%s&client_secret=%s' % (FB_API_VERSION, FB_APP_ID, FB_APP_SECRET)
+		try:
+			result = urlfetch.Fetch(url, method=1)
+		except:
+			print('urlfetch error: app access token')
+			return False
+
+		token = json.loads(result.content)['access_token']
+
+		url = 'https://graph.facebook.com/v%s/%s/notifications?access_token=%s&template=%s&href=login' % (FB_API_VERSION, fb_user_id, token, message)
+		print(url)
+
+		try:
+			result = urlfetch.Fetch(url, method=2)
+		except:
+			print('urlfetch error: notifications')
+			return False
+
+		data = json.loads(result.content)
+
+		if 'error' in data:
+			print('FB notification error')
+			return False
+
+		return True
+
 
 	@endpoints.method(AccessTokenMsg, StringMsg, path='',
 		http_method='POST', name='fbLogin')
@@ -94,7 +128,7 @@ class TennisApi(remote.Service):
 		try:
 			result = urlfetch.Fetch(url, method=1)
 		except:
-			print('urlfetch error2')
+			print('urlfetch error')
 			return status
 
 		data = json.loads(result.content)
@@ -327,6 +361,16 @@ class TennisApi(remote.Service):
 		profile.matches.append(match_key)
 		profile.put()
 
+		# Notify all other players that current user/player has joined the match
+		player_name = profile.firstName + ' ' + profile.lastName
+		for other_player in match.players:
+			if other_player == user_id:
+				continue
+
+			# FB notification
+			fb_user_id = other_player[3:]
+			_ = self._postFbNotif(fb_user_id, urllib.quote(player_name + ' has joined your match'))
+
 		# Return true, for success
 		status = BooleanMsg()
 		status.data = True
@@ -371,8 +415,10 @@ class TennisApi(remote.Service):
 		match.confirmed = False
 
 		# Update Match in ndb
+		match_removed = False
 		if len(match.players) == 0:
 			match.key.delete()
+			match_removed = True
 		else:
 			match.put()
 
@@ -381,6 +427,14 @@ class TennisApi(remote.Service):
 		profile = profile_key.get()
 		profile.matches.remove(match_key)
 		profile.put()
+
+		if not match_removed:
+			# Notify all other players that current user/player has joined the match
+			player_name = profile.firstName + ' ' + profile.lastName
+			for other_player in match.players:
+				# FB notification
+				fb_user_id = other_player[3:]
+				_ = self._postFbNotif(fb_user_id, urllib.quote(player_name + ' has left your match'))
 
 		# Return true, for success (how can it fail?)
 		status = BooleanMsg()

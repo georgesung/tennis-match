@@ -65,10 +65,13 @@ Please wait...
 	<div class="row"><div class="col-sm-12" id="pend-matches">
 		<h5><b>Pending Matches</b></h5>
 		<div class="row match-info pend-match" ng-repeat="match in summary.pendingMatchesFiltered" ng-click="summary.showPendMatch(match)">
-			<div class="col-sm-6">
+			<div class="col-sm-4">
+				<div>{{match.players}}</div>
+			</div>
+			<div class="col-sm-4">
 				<div>{{match.location}}</div>
 			</div>
-			<div class="col-sm-6">
+			<div class="col-sm-4">
 				<div>{{match.date}} - {{match.time}}</div>
 			</div>
 		</div>
