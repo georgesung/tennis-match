@@ -50,5 +50,6 @@ libraries:
 - name: pycrypto
   version: latest
 
-- name: urllib
+# Only using its urlquote function for now
+- name: django
   version: latest

@@ -7,7 +7,7 @@ from datetime import timedelta
 from eastern_tzinfo import Eastern_tzinfo
 import json
 import os
-import urllib
+from django.utils.http import urlquote
 
 import endpoints
 from protorpc import messages
@@ -369,7 +369,7 @@ class TennisApi(remote.Service):
 
 			# FB notification
 			fb_user_id = other_player[3:]
-			_ = self._postFbNotif(fb_user_id, urllib.quote(player_name + ' has joined your match'))
+			_ = self._postFbNotif(fb_user_id, urlquote(player_name + ' has joined your match'))
 
 		# Return true, for success
 		status = BooleanMsg()
@@ -434,7 +434,7 @@ class TennisApi(remote.Service):
 			for other_player in match.players:
 				# FB notification
 				fb_user_id = other_player[3:]
-				_ = self._postFbNotif(fb_user_id, urllib.quote(player_name + ' has left your match'))
+				_ = self._postFbNotif(fb_user_id, urlquote(player_name + ' has left your match'))
 
 		# Return true, for success (how can it fail?)
 		status = BooleanMsg()
