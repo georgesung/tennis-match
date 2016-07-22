@@ -32,6 +32,11 @@ handlers:
   upload: login\.html
   secure: always
 
+- url: /create_account
+  static_files: create_account.html
+  upload: create_account\.html
+  secure: always
+
 - url: /profile
   static_files: profile.html
   upload: profile\.html

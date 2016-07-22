@@ -20,17 +20,14 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12">
-					<h2>Welcome!</h2>
-					<br/>
+					<h2>Welcome</h2>
+					<h5>This tennis app will match you with opponents of similar skill (+/- 0.5 NTRP).<br>The app is still in early phases of development, so please send any feedback and/or suggestions to George Sung.</h5>
+					<hr>
+					<h3>Sign In</h3>
+					<br>
 				</div>
 			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<h4>Please sign-in with your Facebook account</h4>
-					<br/>
-				</div>
-			</div>
-			<!--div class="row">
+			<!--div class="row" id="google-signin">
 				<div class="col-md-12">
 					<div id="my-signin2" data-onsuccess="onSignIn"></div>
 					<br/>
@@ -39,10 +36,28 @@
 			<div class="row">
 				<div class="col-md-12">
 					<fb:login-button scope="public_profile,email" onlogin="fbCheckLoginState();" size="xlarge">
+					Sign in with Facebook
 					</fb:login-button>
 
-					<div id="status">
-					</div>
+					<div id="status"></div>
+
+					<br><em>or</em><br><br>
+
+					<form id="loginForm" name="loginForm" onsubmit="return false">
+						<fieldset class="form-group">
+							<label>Email</label>
+							<input type="email" class="form-control" id="login-email" name="email" placeholder="Email" required>
+						</fieldset>
+
+						<fieldset class="form-group">
+							<label>Password</label>
+							<input type="password" class="form-control" id="login-password" name="password" placeholder="Password" required>
+						</fieldset>
+
+						<button type="submit" class="btn btn-primary" id="login-btn">Sign In</button>
+					</form>
+					<br>
+					<a href="/create_account">Create account</a>
 				</div>
 			</div>
 		</div>

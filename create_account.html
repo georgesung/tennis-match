@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- Include jQuery & form validation -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"></script>
+
+		<!-- Using Bootstrap CDN to include Bootstrap -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+		<!-- My own css -->
+		<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+		<title>Create Account</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<h4>Create Account</h4>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<form id="createAccountForm" name="createAccountForm" onsubmit="return false">
+						<fieldset class="form-group">
+							<label>Email</label>
+							<input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+						</fieldset>
+
+						<fieldset class="form-group">
+							<label>Password</label>
+							<input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+						</fieldset>
+
+						<fieldset class="form-group">
+							<label>Confirm Password</label>
+							<input type="password" class="form-control" id="confPassword" name="confPassword" placeholder="Confirm Password" required>
+						</fieldset>
+
+						<button type="submit" class="btn btn-primary" id="create">Create Account</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<script src="/js/settings.js"></script>
+		<script src="/js/create_account.js"></script>
+	</body>
+</html>
