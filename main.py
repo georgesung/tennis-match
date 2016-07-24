@@ -55,10 +55,43 @@ class TennisApi(remote.Service):
 	# Custom Accounts
 	###################################################################
 
-	def _genToken(self, payload, extra_secret):
-		""" Generate custom auth JWT token given payload dict and extra_secret string """
-		secret = CA_SECRET + extra_secret
+	def _genToken(self, payload):
+		""" Generate custom auth JWT token given payload dict """
+		secret = CA_SECRET
 		return jwt.encode(payload, secret, algorithm='HS256')
+
+	def _decodeToken(self, token):
+		""" Decode custom token. If successful, return payload. Else, return None. """
+		secret = CA_SECRET
+		try:
+			return jwt.decode(token, secret, algorithm='HS256')
+		except:
+			return None
+
+	def _getUserId(self, token):
+		""" Get userId: First check if local account, then check if FB account """
+		# See if token belongs to custom account user
+		ca_payload = self._decodeToken(token)
+		if ca_payload is not None:
+			return ca_payload['userId']
+
+		# If above failed, try FB token
+		return self._getFbUserId(token)
+
+
+	@endpoints.method(AccessTokenMsg, BooleanMsg, path='',
+		http_method='POST', name='verifyToken')
+	def verifyToken(self, request):
+		""" Verify validity of custom account token, return True (valild) or False (invalid) """
+		status = BooleanMsg()  # return status
+		status.data = False  # default to invalid (False)
+
+		ca_payload = self._decodeToken(request.accessToken)
+		if ca_payload is not None:
+			if 'userId' in ca_payload:
+				status.data = True
+
+		return status
 
 	@endpoints.method(PasswordMsg, StringMsg, path='',
 		http_method='POST', name='createAccount')
@@ -89,11 +122,12 @@ class TennisApi(remote.Service):
 			key = profile_key,
 			userId = user_id,
 			contactEmail = request.email,
-			salt_passkey = salt_passkey
+			salt_passkey = salt_passkey,
+			loggedIn = True,
 		).put()
 
 		# Generate user access token (extra_secret = salt)
-		token = self._genToken({'userId': user_id}, salt.encode('hex'))
+		token = self._genToken({'userId': user_id})
 
 		# If we get here, means we suceeded
 		status.data = 'success'
@@ -125,12 +159,34 @@ class TennisApi(remote.Service):
 		if passkey != db_passkey:
 			return status
 
+		# Update user's status to logged-in
+		profile.loggedIn = True
+		profile.put()
+
 		# Generate user access token (extra_secret = salt)
-		token = self._genToken({'userId': user_id}, db_salt)
+		token = self._genToken({'userId': user_id})
 
 		# If we get here, means we suceeded
 		status.data = True
 		status.accessToken = token
+		return status
+
+	@endpoints.method(AccessTokenMsg, BooleanMsg, path='',
+		http_method='POST', name='logout')
+	def logout(self, request):
+		""" Logout """
+		status = BooleanMsg()  # return status
+		status.data = False  # default to error (False)
+
+		user_id = self._getUserId(request.accessToken)
+
+		# Get Profile from NDB, update login status
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+		profile.loggedIn = False
+		profile.put()
+
+		status.data = True
 		return status
 
 
@@ -138,7 +194,7 @@ class TennisApi(remote.Service):
 	# Facebook Authentication & Graph API
 	###################################################################
 
-	def _getUserId(self, token):
+	def _getFbUserId(self, token):
 		""" Given token, find FB user ID from FB, and return it """
 		url = 'https://graph.facebook.com/v%s/me?access_token=%s&fields=id' % (FB_API_VERSION, token)
 		try:
@@ -148,13 +204,11 @@ class TennisApi(remote.Service):
 			return None
 
 		data = json.loads(result.content)
-
 		if 'error' in data:
 			print('FB OAuth token error')
 			return None
 
 		user_id = 'fb_' + data['id']
-
 		return user_id
 
 	def _postFbNotif(self, fb_user_id, message):
@@ -173,8 +227,6 @@ class TennisApi(remote.Service):
 		token = json.loads(result.content)['access_token']
 
 		url = 'https://graph.facebook.com/v%s/%s/notifications?access_token=%s&template=%s&href=login' % (FB_API_VERSION, fb_user_id, token, message)
-		print(url)
-
 		try:
 			result = urlfetch.Fetch(url, method=2)
 		except:
@@ -182,7 +234,6 @@ class TennisApi(remote.Service):
 			return False
 
 		data = json.loads(result.content)
-
 		if 'error' in data:
 			print('FB notification error')
 			return False
@@ -263,41 +314,6 @@ class TennisApi(remote.Service):
 		profile.put()
 
 		status.data = 'new_user'
-		return status
-
-	@endpoints.method(AccessTokenMsg, BooleanMsg, path='',
-		http_method='POST', name='fbLogout')
-	def fbLogout(self, request):
-		""" For FB logins, perform logout """
-		status = BooleanMsg()  # return status
-		status.data = False  # default to error (False)
-
-		# Get FB user ID
-		token = request.accessToken
-
-		# Use token to get user info from API
-		url = 'https://graph.facebook.com/v%s/me?access_token=%s&fields=id' % (FB_API_VERSION, token)
-		try:
-			result = urlfetch.Fetch(url, method=1)
-		except:
-			print('urlfetch error2')
-			return status
-
-		data = json.loads(result.content)
-
-		if 'error' in data:
-			print('FB OAuth token error')
-			return status
-
-		user_id = 'fb_' + data['id']
-
-		# Get Profile from NDB, update login status
-		profile_key = ndb.Key(Profile, user_id)
-		profile = profile_key.get()
-		profile.loggedIn = False
-		profile.put()
-
-		status.data = True
 		return status
 
 

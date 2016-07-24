@@ -23,11 +23,12 @@ app.controller('CaCtrl', function() {
 		gapi.client.tennis.createAccount(passwordMsg).
 			execute(function(resp) {
 				if (resp.result.data == 'success') {
-					console.log('Account creation successful. Give user token and redir to profile page.');
-					console.log(resp.result);
-					localStorage.jwt = resp.result.accessToken;
+					// Account creation successful. Give user token and redir to profile page.
+					localStorage.tennisJwt = resp.result.accessToken;
+					window.location = '/profile';
 				} else if (resp.result.data == 'user_exists') {
-					console.log('User already exists, notify and enable the buttons.');
+					// User already exists, notify and enable the buttons.
+					$('#status').text('This email is already registered');
 					$('.container :input, select, button').attr('disabled', false);
 				} else {
 					console.log('Uknown error...');

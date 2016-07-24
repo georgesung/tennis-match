@@ -40,43 +40,66 @@ app.controller('ProfCtrl', function() {
 });
 
 
+// This function is called after authentication step
+function onAuthSuccess(accessToken) {
+	// Get Angular scope
+	var $scope = $('#profile').scope();
+
+	// If user is authorized, populate fields with user profile info (if logged in)
+	// Note userId == 'fb_|ca_' + facebook_id|email
+	gapi.client.tennis.getProfile({accessToken: accessToken}).
+		execute(function(resp) {
+			// If user is logged-out, redirect to login page
+			if (!resp.result.loggedIn) {
+				window.location = '/login';
+			} else {
+				$scope.$apply(function () {
+					$scope.prof.accessToken = accessToken;
+					$scope.prof.email = resp.result.contactEmail;
+					$scope.prof.firstName = resp.result.firstName;
+					$scope.prof.lastName = resp.result.lastName;
+					$scope.prof.gender = resp.result.gender;
+					$scope.prof.ntrp = resp.result.ntrp;
+				});
+
+				$('#ntrp').slider().slider('setValue', resp.result.ntrp);
+			}
+		});
+}
+
+
 // Any back-end API functionality must be executed -after- the gapi is loaded
+// Execute authentication steps
 function onGapiLoad() {
-	// Facebook authentication
+	// First try Facebook authentication
 	FB.getLoginStatus(function(response) {
 		if (response.status === 'connected') {
 			// Authenticated
 			var accessToken = response.authResponse.accessToken;
 
-			// If user is authorized, populate fields with user profile info (if logged in)
-			// Note userId == 'fb_' + facebook_id
-			gapi.client.tennis.getProfile({accessToken: accessToken}).
-				execute(function(resp) {
-					// If user is logged-out, redirect to login page
-					if (!resp.result.loggedIn) {
+			onAuthSuccess(accessToken);
+		} else {
+			// Not authenticated with FB, check if auth'ed with custom account
+			// If not, redirect to login page
+			var accessToken = localStorage.tennisJwt;
+
+			if (accessToken === undefined) {
+				window.location = '/login';
+			} else {
+				// Verify token with back-end
+				gapi.client.tennis.verifyToken({accessToken: accessToken}).execute(function(resp) {
+					if (resp.result.data === false) {
 						window.location = '/login';
 					} else {
-						// Angular scope
-						var $scope = $('#profile').scope();
-
-						$scope.$apply(function () {
-							$scope.prof.accessToken = accessToken;
-							$scope.prof.email = resp.result.contactEmail;
-							$scope.prof.firstName = resp.result.firstName;
-							$scope.prof.lastName = resp.result.lastName;
-							$scope.prof.gender = resp.result.gender;
-							$scope.prof.ntrp = resp.result.ntrp;
-						});
-
-						$('#ntrp').slider().slider('setValue', resp.result.ntrp);
+						// Token is valid, proceed
+						onAuthSuccess(accessToken);
 					}
 				});
-		} else {
-			// Not authenticated, redirect to login page
-			window.location = '/login';
+			}
 		}
 	});
 }
+
 
 // Cancel button redirects to dashboard, and discards changes
 $('#cancel').click(function() {

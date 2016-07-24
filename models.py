@@ -17,8 +17,8 @@ class Profile(ndb.Model):
 	contactEmail  = ndb.StringProperty(default='')
 	firstName     = ndb.StringProperty(default='')
 	lastName      = ndb.StringProperty(default='')
-	gender        = ndb.StringProperty(default='m')  # m/f
-	ntrp          = ndb.FloatProperty(default=3.5)
+	gender        = ndb.StringProperty(default='')  # m/f
+	ntrp          = ndb.FloatProperty(default=0.0)
 	matches       = ndb.StringProperty(repeated=True)  # match keys (store urlsafe version), dynamically changing
 	loggedIn      = ndb.BooleanProperty(default=False)
 	salt_passkey  = ndb.StringProperty(default='')

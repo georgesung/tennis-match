@@ -23,11 +23,12 @@ app.controller('LoginCtrl', function() {
 		gapi.client.tennis.login(passwordMsg).
 			execute(function(resp) {
 				if (resp.result.data) {
-					console.log('Login successful. Give user token and redir to dashboard.');
-					console.log(resp.result);
-					localStorage.jwt = resp.result.accessToken;
+					// Login successful, give user token and redir to dashboard
+					localStorage.tennisJwt = resp.result.accessToken;
+					window.location = '/';
 				} else {
-					console.log('Login failed, let user know. Implement forgot password stuff and email verif later.');
+					// Login failed, let user know. Implement forgot password stuff and email verif later.
+					$('#login-status').text('Email/password does not match');
 					$('.container :input, select, button').attr('disabled', false);
 				}
 			});
