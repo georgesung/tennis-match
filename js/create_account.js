@@ -24,6 +24,8 @@ app.controller('CaCtrl', function() {
 			execute(function(resp) {
 				if (resp.result.data == 'success') {
 					console.log('Account creation successful. Give user token and redir to profile page.');
+					console.log(resp.result);
+					localStorage.jwt = resp.result.accessToken;
 				} else if (resp.result.data == 'user_exists') {
 					console.log('User already exists, notify and enable the buttons.');
 					$('.container :input, select, button').attr('disabled', false);
@@ -42,12 +44,12 @@ $("#createAccountForm").validate({
 			required: true,
 			email: true
 		},
-		password: { 
+		password: {
 			required: true,
 			minlength: 6,
 			maxlength: 20,
 		},
-		confPassword: { 
+		confPassword: {
 			equalTo: "#password",
 			minlength: 6,
 			maxlength: 20
@@ -61,4 +63,9 @@ $("#createAccountForm").validate({
 			equalTo: "Passwords do not match."
 		}
 	}
+});
+
+// Cancel button redirects to dashboard
+$('#cancel').click(function() {
+	window.location = '/';
 });

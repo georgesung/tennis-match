@@ -24,6 +24,8 @@ app.controller('LoginCtrl', function() {
 			execute(function(resp) {
 				if (resp.result.data) {
 					console.log('Login successful. Give user token and redir to dashboard.');
+					console.log(resp.result);
+					localStorage.jwt = resp.result.accessToken;
 				} else {
 					console.log('Login failed, let user know. Implement forgot password stuff and email verif later.');
 					$('.container :input, select, button').attr('disabled', false);

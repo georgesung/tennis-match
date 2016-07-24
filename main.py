@@ -55,6 +55,11 @@ class TennisApi(remote.Service):
 	# Custom Accounts
 	###################################################################
 
+	def _genToken(self, payload, extra_secret):
+		""" Generate custom auth JWT token given payload dict and extra_secret string """
+		secret = CA_SECRET + extra_secret
+		return jwt.encode(payload, secret, algorithm='HS256')
+
 	@endpoints.method(PasswordMsg, StringMsg, path='',
 		http_method='POST', name='createAccount')
 	def createAccount(self, request):
@@ -86,8 +91,13 @@ class TennisApi(remote.Service):
 			contactEmail = request.email,
 			salt_passkey = salt_passkey
 		).put()
-		
+
+		# Generate user access token (extra_secret = salt)
+		token = self._genToken({'userId': user_id}, salt.encode('hex'))
+
+		# If we get here, means we suceeded
 		status.data = 'success'
+		status.accessToken = token
 		return status
 
 	@endpoints.method(PasswordMsg, BooleanMsg, path='',
@@ -114,9 +124,13 @@ class TennisApi(remote.Service):
 		# Passwords don't match, return False
 		if passkey != db_passkey:
 			return status
-		
+
+		# Generate user access token (extra_secret = salt)
+		token = self._genToken({'userId': user_id}, db_salt)
+
 		# If we get here, means we suceeded
 		status.data = True
+		status.accessToken = token
 		return status
 
 
