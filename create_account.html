@@ -8,6 +8,9 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"></script>
 
+		<!-- Include AngularJS -->
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+
 		<!-- Using Bootstrap CDN to include Bootstrap -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
@@ -17,8 +20,8 @@
 
 		<title>Create Account</title>
 	</head>
-	<body>
-		<div class="container">
+	<body ng-app="create-account">
+		<div class="container" id="create-account" ng-controller="CaCtrl as ca">
 			<div class="row">
 				<div class="col-md-12">
 					<h4>Create Account</h4>
@@ -26,15 +29,15 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<form id="createAccountForm" name="createAccountForm" onsubmit="return false">
+					<form id="createAccountForm" name="createAccountForm" ng-submit="ca.submitForm()">
 						<fieldset class="form-group">
 							<label>Email</label>
-							<input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+							<input type="email" class="form-control" id="email" name="email" ng-model="ca.email" placeholder="Email" required>
 						</fieldset>
 
 						<fieldset class="form-group">
 							<label>Password</label>
-							<input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+							<input type="password" class="form-control" id="password" name="password" ng-model="ca.password" placeholder="Password" required>
 						</fieldset>
 
 						<fieldset class="form-group">
@@ -50,5 +53,14 @@
 
 		<script src="/js/settings.js"></script>
 		<script src="/js/create_account.js"></script>
+
+		<!-- Google App Engine API -->
+		<script>
+		function init() {
+			gapi.client.load('tennis', 'v1', null, '//' + window.location.host + '/_ah/api');
+			gapi.client.load('oauth2', 'v2', null);
+		};
+		</script>
+		<script src="https://apis.google.com/js/client.js?onload=init"></script>
 	</body>
 </html>

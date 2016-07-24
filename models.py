@@ -34,8 +34,8 @@ class ProfileMsg(messages.Message):
 	loggedIn      = messages.BooleanField(8)
 
 class PasswordMsg(messages.Message):
-	contactEmail  = messages.StringField(1)
-	password      = messages.StringField(2)
+	email    = messages.StringField(1)
+	password = messages.StringField(2)
 
 
 # Access token message

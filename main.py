@@ -62,7 +62,7 @@ class TennisApi(remote.Service):
 		status = StringMsg()  # return status
 		status.data = 'error'  # default to error
 
-		user_id = 'ca_' + request.contactEmail
+		user_id = 'ca_' + request.email
 
 		# Get profile from datastore -- if profile not found, then profile=None
 		profile_key = ndb.Key(Profile, user_id)
@@ -83,7 +83,7 @@ class TennisApi(remote.Service):
 		Profile(
 			key = profile_key,
 			userId = user_id,
-			contactEmail = request.contactEmail,
+			contactEmail = request.email,
 			salt_passkey = salt_passkey
 		).put()
 		
@@ -97,7 +97,7 @@ class TennisApi(remote.Service):
 		status = BooleanMsg()  # return status
 		status.data = False  # default to error (False)
 
-		user_id = 'ca_' + request.contactEmail
+		user_id = 'ca_' + request.email
 
 		# Get profile from datastore -- if profile not found, then profile=None
 		profile_key = ndb.Key(Profile, user_id)
@@ -222,7 +222,13 @@ class TennisApi(remote.Service):
 		profile = profile_key.get()
 
 		# If profile already exists, return 'existing_user'
+		# Unless, they have empty firstName (maybe they got d/c'ed on profile page)
 		if profile:
+			# If empty first name, return new_user
+			if profile.firstName == '':
+				status.data = 'new_user'
+				return status
+
 			# If user previously logged-out, update login status in NDB
 			if not profile.loggedIn:
 				profile.loggedIn = True

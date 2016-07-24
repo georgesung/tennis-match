@@ -1,5 +1,41 @@
 'use strict';
 
+// AngularJS
+var app = angular.module('create-account', []);
+
+app.controller('CaCtrl', function() {
+	var ca = this;
+
+	ca.submitForm = function() {
+		// First, disable all inputs while in process
+		$('.container :input, select, button').attr('disabled', true);
+
+		// Read values from form
+		var email    = $('#email').val();
+		var password = $('#password').val();
+
+		var passwordMsg = {
+			'email':    email,
+			'password': password,
+		};
+
+		// Call back-end API
+		gapi.client.tennis.createAccount(passwordMsg).
+			execute(function(resp) {
+				if (resp.result.data == 'success') {
+					console.log('Account creation successful. Give user token and redir to profile page.');
+				} else if (resp.result.data == 'user_exists') {
+					console.log('User already exists, notify and enable the buttons.');
+					$('.container :input, select, button').attr('disabled', false);
+				} else {
+					console.log('Uknown error...');
+				}
+			});
+	}
+});
+
+// Use Jquery validate plugin to validate form
+// Maybe migrate this to AngularJS?
 $("#createAccountForm").validate({
 	rules: {
 		email: {

@@ -1,5 +1,38 @@
 'use strict';
 
+// AngularJS
+var app = angular.module('login', []);
+
+app.controller('LoginCtrl', function() {
+	var lgn = this;
+
+	lgn.submitForm = function() {
+		// First, disable all inputs while login is in process
+		$('.container :input, select, button').attr('disabled', true);
+
+		// Read values from form
+		var email    = $('#email').val();
+		var password = $('#password').val();
+
+		var passwordMsg = {
+			'email':    email,
+			'password': password,
+		};
+
+		// Call back-end API
+		gapi.client.tennis.login(passwordMsg).
+			execute(function(resp) {
+				if (resp.result.data) {
+					console.log('Login successful. Give user token and redir to dashboard.');
+				} else {
+					console.log('Login failed, let user know. Implement forgot password stuff and email verif later.');
+					$('.container :input, select, button').attr('disabled', false);
+				}
+			});
+	}
+});
+
+
 // This is called with the results from from FB.getLoginStatus().
 function statusChangeCallback(response) {
 	// The response object is returned with a status field that lets the
