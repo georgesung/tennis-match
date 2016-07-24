@@ -1,3 +1,6 @@
+# Custom accounts
+CA_SECRET = 'secret'
+
 # Facebook
 FB_APP_ID = '1739379949638650'
 FB_APP_SECRET = 'secret'

@@ -8,6 +8,9 @@ from eastern_tzinfo import Eastern_tzinfo
 import json
 import os
 from django.utils.http import urlquote
+import Crypto.Random
+from Crypto.Protocol import KDF
+import jwt
 
 import endpoints
 from protorpc import messages
@@ -19,6 +22,7 @@ from google.appengine.ext import ndb
 
 from models import Profile
 from models import ProfileMsg
+from models import PasswordMsg
 from models import Match
 from models import MatchMsg
 from models import MatchesMsg
@@ -26,12 +30,14 @@ from models import StringMsg
 from models import BooleanMsg
 from models import AccessTokenMsg
 
+# Custom accounts
+from settings import CA_SECRET
 # Facebook
 from settings import FB_APP_ID
 from settings import FB_APP_SECRET
 from settings import FB_API_VERSION
 # Google
-from settings import WEB_CLIENT_ID
+#from settings import WEB_CLIENT_ID
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -40,10 +46,79 @@ API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
 @endpoints.api( name='tennis',
 				version='v1',
-				allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID],
+				allowed_client_ids=[API_EXPLORER_CLIENT_ID],
 				scopes=[EMAIL_SCOPE])
 class TennisApi(remote.Service):
 	"""Tennis API"""
+
+	###################################################################
+	# Custom Accounts
+	###################################################################
+
+	@endpoints.method(PasswordMsg, StringMsg, path='',
+		http_method='POST', name='createAccount')
+	def createAccount(self, request):
+		""" Create new custom account """
+		status = StringMsg()  # return status
+		status.data = 'error'  # default to error
+
+		user_id = 'ca_' + request.contactEmail
+
+		# Get profile from datastore -- if profile not found, then profile=None
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# If profile exists, return status
+		if profile:
+			status.data = 'user_exists'
+			return status
+
+		# Salt and hash the password
+		salt = Crypto.Random.new().read(16)
+		passkey = KDF.PBKDF2(request.password, salt).encode('hex')
+
+		salt_passkey = salt.encode('hex') + '|' + passkey
+
+		# Create new profile for user
+		Profile(
+			key = profile_key,
+			userId = user_id,
+			contactEmail = request.contactEmail,
+			salt_passkey = salt_passkey
+		).put()
+		
+		status.data = 'success'
+		return status
+
+	@endpoints.method(PasswordMsg, BooleanMsg, path='',
+		http_method='POST', name='login')
+	def login(self, request):
+		""" Check username/password to login """
+		status = BooleanMsg()  # return status
+		status.data = False  # default to error (False)
+
+		user_id = 'ca_' + request.contactEmail
+
+		# Get profile from datastore -- if profile not found, then profile=None
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# If profile does not exist, return False
+		if not profile:
+			return status
+
+		# Parse salt and passkey from DB, compare it to provided version
+		db_salt, db_passkey = profile.salt_passkey.split('|')
+		passkey = KDF.PBKDF2(request.password, db_salt.decode('hex')).encode('hex')
+
+		# Passwords don't match, return False
+		if passkey != db_passkey:
+			return status
+		
+		# If we get here, means we suceeded
+		status.data = True
+		return status
+
 
 	###################################################################
 	# Facebook Authentication & Graph API

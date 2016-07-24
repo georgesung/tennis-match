@@ -46,6 +46,11 @@ handlers:
   script: main.api
   secure: always
 
+# Admin console
+- url: /admin/.*
+  script: google.appengine.ext.admin.application
+  login: admin
+
 libraries:
 
 - name: endpoints

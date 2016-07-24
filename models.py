@@ -21,6 +21,7 @@ class Profile(ndb.Model):
 	ntrp          = ndb.FloatProperty(default=3.5)
 	matches       = ndb.StringProperty(repeated=True)  # match keys (store urlsafe version), dynamically changing
 	loggedIn      = ndb.BooleanProperty(default=False)
+	salt_passkey  = ndb.StringProperty(default='')
 
 class ProfileMsg(messages.Message):
 	userId        = messages.StringField(1)
@@ -31,6 +32,15 @@ class ProfileMsg(messages.Message):
 	ntrp          = messages.FloatField(6)
 	accessToken   = messages.StringField(7)
 	loggedIn      = messages.BooleanField(8)
+
+class PasswordMsg(messages.Message):
+	contactEmail  = messages.StringField(1)
+	password      = messages.StringField(2)
+
+
+# Access token message
+class AccessTokenMsg(messages.Message):
+	accessToken = messages.StringField(1)
 
 
 # Match object, and its messages
@@ -65,6 +75,7 @@ class MatchesMsg(messages.Message):
 	key        = messages.StringField(7, repeated=True)  # ndb key for each Match entity
 	accessToken = messages.StringField(8)
 
+
 # Generic data messages
 class BooleanMsg(messages.Message):
 	data = messages.BooleanField(1)
@@ -73,7 +84,3 @@ class BooleanMsg(messages.Message):
 class StringMsg(messages.Message):
 	data = messages.StringField(1)
 	accessToken = messages.StringField(2)
-
-# Access token message
-class AccessTokenMsg(messages.Message):
-	accessToken = messages.StringField(1)
