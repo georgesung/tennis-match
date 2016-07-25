@@ -478,9 +478,10 @@ class TennisApi(remote.Service):
 			if other_player == user_id:
 				continue
 
-			# FB notification
-			fb_user_id = other_player[3:]
-			_ = self._postFbNotif(fb_user_id, urlquote(player_name + ' has joined your match'))
+			if other_player[3:] == 'fb_':
+				# FB notification
+				fb_user_id = other_player[3:]
+				self._postFbNotif(fb_user_id, urlquote(player_name + ' has joined your match'))
 
 		# Return true, for success
 		status = BooleanMsg()
@@ -543,9 +544,10 @@ class TennisApi(remote.Service):
 			# Notify all other players that current user/player has joined the match
 			player_name = profile.firstName + ' ' + profile.lastName
 			for other_player in match.players:
-				# FB notification
-				fb_user_id = other_player[3:]
-				_ = self._postFbNotif(fb_user_id, urlquote(player_name + ' has left your match'))
+				if other_player[3:] == 'fb_':
+					# FB notification
+					fb_user_id = other_player[3:]
+					self._postFbNotif(fb_user_id, urlquote(player_name + ' has left your match'))
 
 		# Return true, for success (how can it fail?)
 		status = BooleanMsg()
