@@ -22,6 +22,7 @@ from google.appengine.ext import ndb
 
 from models import Profile
 from models import ProfileMsg
+from models import CreateAccountMsg
 from models import PasswordMsg
 from models import Match
 from models import MatchMsg
@@ -37,6 +38,7 @@ from settings import FB_APP_ID
 from settings import FB_APP_SECRET
 from settings import FB_API_VERSION
 # Google
+from settings import GRECAPTCHA_SECRET
 #from settings import WEB_CLIENT_ID
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
@@ -93,12 +95,27 @@ class TennisApi(remote.Service):
 
 		return status
 
-	@endpoints.method(PasswordMsg, StringMsg, path='',
+	@endpoints.method(CreateAccountMsg, StringMsg, path='',
 		http_method='POST', name='createAccount')
 	def createAccount(self, request):
 		""" Create new custom account """
 		status = StringMsg()  # return status
 		status.data = 'error'  # default to error
+
+		# Verify if user passed reCAPTCHA
+		# POST request to Google reCAPTCHA API
+		url = 'https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s' % (GRECAPTCHA_SECRET, request.recaptcha)
+		try:
+			result = urlfetch.Fetch(url, method=2)
+		except:
+			raise endpoints.BadRequestException('urlfetch error: Unable to POST to Google reCAPTCHA')
+			return False
+
+		data = json.loads(result.content)
+		print(data)
+		if not data['success']:
+			status.data = 'recaptcha_fail'
+			return status
 
 		user_id = 'ca_' + request.email
 
@@ -200,12 +217,12 @@ class TennisApi(remote.Service):
 		try:
 			result = urlfetch.Fetch(url, method=1)
 		except:
-			print('urlfetch error2')
+			raise endpoints.BadRequestException('urlfetch error: Get FB user ID')
 			return None
 
 		data = json.loads(result.content)
 		if 'error' in data:
-			print('FB OAuth token error')
+			raise endpoints.BadRequestException('FB OAuth token error')
 			return None
 
 		user_id = 'fb_' + data['id']
@@ -221,7 +238,7 @@ class TennisApi(remote.Service):
 		try:
 			result = urlfetch.Fetch(url, method=1)
 		except:
-			print('urlfetch error: app access token')
+			raise endpoints.BadRequestException('urlfetch error: FB app access token')
 			return False
 
 		token = json.loads(result.content)['access_token']
@@ -230,12 +247,12 @@ class TennisApi(remote.Service):
 		try:
 			result = urlfetch.Fetch(url, method=2)
 		except:
-			print('urlfetch error: notifications')
+			raise endpoints.BadRequestException('urlfetch error: Unable to POST FB notification')
 			return False
 
 		data = json.loads(result.content)
 		if 'error' in data:
-			print('FB notification error')
+			raise endpoints.BadRequestException('FB notification error')
 			return False
 
 		return True

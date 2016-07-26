@@ -7,4 +7,5 @@ FB_APP_SECRET = 'secret'
 FB_API_VERSION = '2.7'
 
 # Google
-WEB_CLIENT_ID = 'secret'
+GRECAPTCHA_SECRET = 'secret'
+#WEB_CLIENT_ID = 'secret'

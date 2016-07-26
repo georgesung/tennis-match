@@ -14,24 +14,39 @@ app.controller('CaCtrl', function() {
 		var email    = $('#email').val();
 		var password = $('#password').val();
 
-		var passwordMsg = {
-			'email':    email,
-			'password': password,
+		// Obtain reCAPTCHA response
+		var recaptcha = grecaptcha.getResponse();
+
+		// Construct message to send to back-end API
+		var createAccountMsg = {
+			'email':     email,
+			'password':  password,
+			'recaptcha': recaptcha,
 		};
 
 		// Call back-end API
-		gapi.client.tennis.createAccount(passwordMsg).
+		gapi.client.tennis.createAccount(createAccountMsg).
 			execute(function(resp) {
 				if (resp.result.data == 'success') {
-					// Account creation successful. Give user token and redir to profile page.
+					// Account creation successful. Give user token and redirect to profile page.
 					localStorage.tennisJwt = resp.result.accessToken;
 					window.location = '/profile';
+
 				} else if (resp.result.data == 'user_exists') {
 					// User already exists, notify and enable the buttons.
 					$('#status').text('This email is already registered');
 					$('.container :input, select, button').attr('disabled', false);
+					grecaptcha.reset();
+
+				} else if (resp.result.data == 'recaptcha_fail') {
+					// reCAPTCHA failed, notify and enable the buttons.
+					$('#status').text('Please verify you are not a robot');
+					$('.container :input, select, button').attr('disabled', false);
+
 				} else {
 					console.log('Uknown error...');
+					$('.container :input, select, button').attr('disabled', false);
+					grecaptcha.reset();
 				}
 			});
 	}
