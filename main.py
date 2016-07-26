@@ -80,17 +80,14 @@ class TennisApi(remote.Service):
 			'Authorization': SPARKPOST_SECRET,
 			'Content-Type': 'application/json',
 		}
-		print('partner')  # DEBUG
 		# POST to SparkPost API
 		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
 		try:
-			result = urlfetch.Fetch(url, payload=payload_json, method=2)
+			result = urlfetch.Fetch(url, headers=headers, payload=payload_json, method=2)
 		except:
 			raise endpoints.BadRequestException('urlfetch error: Unable to POST to SparkPost')
 			return False
-		print(result)  # DEBUG
 		data = json.loads(result.content)
-		print(data)  # DEBUG
 
 		# Determine status of email verification from SparkPost, return True/False
 		if 'errors' in data:
@@ -405,9 +402,9 @@ class TennisApi(remote.Service):
 		profile_key = ndb.Key(Profile, user_id)
 		profile = profile_key.get()
 
-		# If profile is empty, something is wrong
+		# If profile does not exist, return empty ProfileMsg
 		if not profile:
-			print('ERROR: User should have initial profile')
+			return ProfileMsg()
 
 		return self._copyProfileToForm(profile)
 
@@ -425,6 +422,8 @@ class TennisApi(remote.Service):
 		profile_key = ndb.Key(Profile, user_id)
 		profile = profile_key.get()
 
+		email_change = profile.contactEmail != request.contactEmail
+
 		# Update profile object from the user's form
 		for field in request.all_fields():
 			if field.name == 'userId':
@@ -434,10 +433,8 @@ class TennisApi(remote.Service):
 
 		# If this is user's first time updating profile, or changing email address (FB user only)
 		# then send email verification
-		print('wtf dude')  # DEBUG
-		if profile.pristine or (profile.contactEmail != request.contactEmail):
+		if profile.pristine or email_change:
 			profile.pristine = False
-			print('howdy')  # DEBUG
 			self._emailVerif(profile)
 
 		# Save updated profile to datastore
