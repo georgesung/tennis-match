@@ -65,7 +65,7 @@ $('#play-button').click(function() {
 	gapi.client.tennis.joinMatch(matchKey).execute(function(resp) {
 		var resultMsg = '';
 		if (resp.data) {
-			resultMsg = 'Successfully joined the match!'
+			resultMsg = 'Successfully joined the match'
 		} else {
 			resultMsg = 'Sorry, the match is already full'
 		}
