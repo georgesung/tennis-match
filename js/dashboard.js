@@ -198,6 +198,8 @@ function onAuthSuccess(accessToken) {
 	// since it makes back-end API call to request match for current user
 	$scope.$apply(function () { $scope.summary.setAccessToken(accessToken); });
 
+	var profile_valid = false;
+
 	// Get Profile, update greeting on summary (if logged in)
 	gapi.client.tennis.getProfile({accessToken: accessToken}).
 		execute(function(resp) {
@@ -214,80 +216,85 @@ function onAuthSuccess(accessToken) {
 					$scope.summary.firstName = resp.result.firstName;
 					$scope.summary.showDashboard = true;
 				});
+
+				// Allow the other back-end calls to proceed
+				profile_valid = true;
 			}
 		});
 
-	// Get all matches for current user, populate Confirmed Matches and Pending Matches
-	gapi.client.tennis.getMyMatches({accessToken: accessToken}).execute(function(resp) {
-		if (resp.result.singles === undefined) { return; }
+	if (profile_valid) {
+		// Get all matches for current user, populate Confirmed Matches and Pending Matches
+		gapi.client.tennis.getMyMatches({accessToken: accessToken}).execute(function(resp) {
+			if (resp.result.singles === undefined) { return; }
 
-		// The MatchesMsg message is stored in resp.result
-		// Go through all matches in the match "list" (see models.py for format)
-		var matches = resp.result;
-		var num_matches = matches.singles.length;
+			// The MatchesMsg message is stored in resp.result
+			// Go through all matches in the match "list" (see models.py for format)
+			var matches = resp.result;
+			var num_matches = matches.singles.length;
 
-		var confirmedMatches = [];
-		var pendingMatches = [];
+			var confirmedMatches = [];
+			var pendingMatches = [];
 
-		for (var i = 0; i < num_matches; i++) {
-			var newMatch = new Match(
-				matches.singles[i],
-				matches.date[i],
-				matches.time[i],
-				matches.location[i],
-				matches.players[i],
-				matches.confirmed[i],
-				matches.key[i]
-			);
+			for (var i = 0; i < num_matches; i++) {
+				var newMatch = new Match(
+					matches.singles[i],
+					matches.date[i],
+					matches.time[i],
+					matches.location[i],
+					matches.players[i],
+					matches.confirmed[i],
+					matches.key[i]
+				);
 
-			if (newMatch.confirmed) {
-				confirmedMatches.push(newMatch);
-			} else {
-				pendingMatches.push(newMatch);
+				if (newMatch.confirmed) {
+					confirmedMatches.push(newMatch);
+				} else {
+					pendingMatches.push(newMatch);
+				}
 			}
-		}
 
-		// Point to the confirmed/pendingMatches in the controller
-		$scope.$apply(function () {
-			$scope.summary.confirmedMatches = confirmedMatches;
-			$scope.summary.pendingMatches = pendingMatches;
+			// Point to the confirmed/pendingMatches in the controller
+			$scope.$apply(function () {
+				$scope.summary.confirmedMatches = confirmedMatches;
+				$scope.summary.pendingMatches = pendingMatches;
 
-			$scope.summary.filterMatches();
+				$scope.summary.filterMatches();
+			});
 		});
-	});
 
-	// Query all available matches for current user, populate Available Matches
-	gapi.client.tennis.getAvailableMatches({accessToken: accessToken}).execute(function(resp) {
-		if (resp.result.singles === undefined) { return; }
+		// Query all available matches for current user, populate Available Matches
+		gapi.client.tennis.getAvailableMatches({accessToken: accessToken}).execute(function(resp) {
+			if (resp.result.singles === undefined) { return; }
 
-		// The MatchesMsg message is stored in resp.result
-		// Go through all matches in the match "list" (see models.py for format)
-		var matches = resp.result;
-		var num_matches = matches.singles.length;
+			// The MatchesMsg message is stored in resp.result
+			// Go through all matches in the match "list" (see models.py for format)
+			var matches = resp.result;
+			var num_matches = matches.singles.length;
 
-		var availableMatches = [];
+			var availableMatches = [];
 
-		for (var i = 0; i < num_matches; i++) {
-			var newMatch = new Match(
-				matches.singles[i],
-				matches.date[i],
-				matches.time[i],
-				matches.location[i],
-				matches.players[i],
-				matches.confirmed[i],
-				matches.key[i]
-			);
+			for (var i = 0; i < num_matches; i++) {
+				var newMatch = new Match(
+					matches.singles[i],
+					matches.date[i],
+					matches.time[i],
+					matches.location[i],
+					matches.players[i],
+					matches.confirmed[i],
+					matches.key[i]
+				);
 
-			availableMatches.push(newMatch);
-		}
+				availableMatches.push(newMatch);
+			}
 
-		// Point to the availableMatches in the controller
-		$scope.$apply(function () {
-			$scope.summary.availableMatches = availableMatches;
+			// Point to the availableMatches in the controller
+			$scope.$apply(function () {
+				$scope.summary.availableMatches = availableMatches;
 
-			$scope.summary.filterMatches();
+				$scope.summary.filterMatches();
+			});
 		});
-	});
+	}
 }
 
 
