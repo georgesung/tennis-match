@@ -198,6 +198,83 @@ app.controller('MatchCtrl', function(currentMatch) {
 // User Authentication
 ///////////////////////////////////////////////////////
 
+// Show confirmed/pending/available matches for current user (only call after auth'ed)
+function showMatches(accessToken) {
+	var $scope = $('#dashboard').scope();
+	
+	// Get all matches for current user, populate Confirmed Matches and Pending Matches
+	gapi.client.tennis.getMyMatches({accessToken: accessToken}).execute(function(resp) {
+		if (resp.result.singles === undefined) { return; }
+
+		// The MatchesMsg message is stored in resp.result
+		// Go through all matches in the match "list" (see models.py for format)
+		var matches = resp.result;
+		var num_matches = matches.singles.length;
+
+		var confirmedMatches = [];
+		var pendingMatches = [];
+
+		for (var i = 0; i < num_matches; i++) {
+			var newMatch = new Match(
+				matches.singles[i],
+				matches.date[i],
+				matches.time[i],
+				matches.location[i],
+				matches.players[i],
+				matches.confirmed[i],
+				matches.key[i]
+			);
+
+			if (newMatch.confirmed) {
+				confirmedMatches.push(newMatch);
+			} else {
+				pendingMatches.push(newMatch);
+			}
+		}
+
+		// Point to the confirmed/pendingMatches in the controller
+		$scope.$apply(function () {
+			$scope.summary.confirmedMatches = confirmedMatches;
+			$scope.summary.pendingMatches = pendingMatches;
+
+			$scope.summary.filterMatches();
+		});
+	});
+
+	// Query all available matches for current user, populate Available Matches
+	gapi.client.tennis.getAvailableMatches({accessToken: accessToken}).execute(function(resp) {
+		if (resp.result.singles === undefined) { return; }
+
+		// The MatchesMsg message is stored in resp.result
+		// Go through all matches in the match "list" (see models.py for format)
+		var matches = resp.result;
+		var num_matches = matches.singles.length;
+
+		var availableMatches = [];
+
+		for (var i = 0; i < num_matches; i++) {
+			var newMatch = new Match(
+				matches.singles[i],
+				matches.date[i],
+				matches.time[i],
+				matches.location[i],
+				matches.players[i],
+				matches.confirmed[i],
+				matches.key[i]
+			);
+
+			availableMatches.push(newMatch);
+		}
+
+		// Point to the availableMatches in the controller
+		$scope.$apply(function () {
+			$scope.summary.availableMatches = availableMatches;
+
+			$scope.summary.filterMatches();
+		});
+	});
+}
+
 // Update dashboard front-end with data from back-end, after authentication is complete
 // This function is called after authentication step
 function onAuthSuccess(accessToken) {
@@ -227,84 +304,10 @@ function onAuthSuccess(accessToken) {
 					$scope.summary.showDashboard = true;
 				});
 
-				// Allow the other back-end calls to proceed
-				profile_valid = true;
+				// Get and show match info
+				showMatches(accessToken);
 			}
 		});
-
-	if (profile_valid) {
-		// Get all matches for current user, populate Confirmed Matches and Pending Matches
-		gapi.client.tennis.getMyMatches({accessToken: accessToken}).execute(function(resp) {
-			if (resp.result.singles === undefined) { return; }
-
-			// The MatchesMsg message is stored in resp.result
-			// Go through all matches in the match "list" (see models.py for format)
-			var matches = resp.result;
-			var num_matches = matches.singles.length;
-
-			var confirmedMatches = [];
-			var pendingMatches = [];
-
-			for (var i = 0; i < num_matches; i++) {
-				var newMatch = new Match(
-					matches.singles[i],
-					matches.date[i],
-					matches.time[i],
-					matches.location[i],
-					matches.players[i],
-					matches.confirmed[i],
-					matches.key[i]
-				);
-
-				if (newMatch.confirmed) {
-					confirmedMatches.push(newMatch);
-				} else {
-					pendingMatches.push(newMatch);
-				}
-			}
-
-			// Point to the confirmed/pendingMatches in the controller
-			$scope.$apply(function () {
-				$scope.summary.confirmedMatches = confirmedMatches;
-				$scope.summary.pendingMatches = pendingMatches;
-
-				$scope.summary.filterMatches();
-			});
-		});
-
-		// Query all available matches for current user, populate Available Matches
-		gapi.client.tennis.getAvailableMatches({accessToken: accessToken}).execute(function(resp) {
-			if (resp.result.singles === undefined) { return; }
-
-			// The MatchesMsg message is stored in resp.result
-			// Go through all matches in the match "list" (see models.py for format)
-			var matches = resp.result;
-			var num_matches = matches.singles.length;
-
-			var availableMatches = [];
-
-			for (var i = 0; i < num_matches; i++) {
-				var newMatch = new Match(
-					matches.singles[i],
-					matches.date[i],
-					matches.time[i],
-					matches.location[i],
-					matches.players[i],
-					matches.confirmed[i],
-					matches.key[i]
-				);
-
-				availableMatches.push(newMatch);
-			}
-
-			// Point to the availableMatches in the controller
-			$scope.$apply(function () {
-				$scope.summary.availableMatches = availableMatches;
-
-				$scope.summary.filterMatches();
-			});
-		});
-	}
 }
 
 // Try FB auth
