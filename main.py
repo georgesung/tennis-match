@@ -40,6 +40,8 @@ from settings import FB_API_VERSION
 # Google
 from settings import GRECAPTCHA_SECRET
 #from settings import WEB_CLIENT_ID
+# SparkPost
+from settings import SPARKPOST_SECRET
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -52,6 +54,52 @@ API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 				scopes=[EMAIL_SCOPE])
 class TennisApi(remote.Service):
 	"""Tennis API"""
+
+	###################################################################
+	# Email Management
+	###################################################################
+
+	def _emailVerif(self, profile):
+		""" Send verification email, given reference to Profile object. Return success True/False. """
+		payload = {
+			'recipients': [{
+				'address': {
+					'email': profile.contactEmail,
+					'name': profile.firstName + ' ' + profile.lastName,
+				},
+				'substitution_data': {
+					'first_name': profile.firstName,
+				},
+			}],
+			'content': {
+				'template_id': 'email-verif',
+			},
+		}
+		payload_json = json.dumps(payload)
+		headers = {
+			'Authorization': SPARKPOST_SECRET,
+			'Content-Type': 'application/json',
+		}
+		print('partner')  # DEBUG
+		# POST to SparkPost API
+		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
+		try:
+			result = urlfetch.Fetch(url, payload=payload_json, method=2)
+		except:
+			raise endpoints.BadRequestException('urlfetch error: Unable to POST to SparkPost')
+			return False
+		print(result)  # DEBUG
+		data = json.loads(result.content)
+		print(data)  # DEBUG
+
+		# Determine status of email verification from SparkPost, return True/False
+		if 'errors' in data:
+			return False
+		if data['results']['total_accepted_recipients'] != 1:
+			return False
+
+		return True
+
 
 	###################################################################
 	# Custom Accounts
@@ -109,10 +157,8 @@ class TennisApi(remote.Service):
 			result = urlfetch.Fetch(url, method=2)
 		except:
 			raise endpoints.BadRequestException('urlfetch error: Unable to POST to Google reCAPTCHA')
-			return False
-
+			return status
 		data = json.loads(result.content)
-		print(data)
 		if not data['success']:
 			status.data = 'recaptcha_fail'
 			return status
@@ -385,6 +431,14 @@ class TennisApi(remote.Service):
 				setattr(profile, 'userId', user_id)
 			elif field.name != 'accessToken':
 				setattr(profile, field.name, getattr(request, field.name))
+
+		# If this is user's first time updating profile, or changing email address (FB user only)
+		# then send email verification
+		print('wtf dude')  # DEBUG
+		if profile.pristine or (profile.contactEmail != request.contactEmail):
+			profile.pristine = False
+			print('howdy')  # DEBUG
+			self._emailVerif(profile)
 
 		# Save updated profile to datastore
 		profile.put()

@@ -9,3 +9,6 @@ FB_API_VERSION = '2.7'
 # Google
 GRECAPTCHA_SECRET = 'secret'
 #WEB_CLIENT_ID = 'secret'
+
+# Sparkpost
+SPARKPOST_SECRET = 'secret'

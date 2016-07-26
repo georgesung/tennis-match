@@ -22,6 +22,8 @@ class Profile(ndb.Model):
 	matches       = ndb.StringProperty(repeated=True)  # match keys (store urlsafe version), dynamically changing
 	loggedIn      = ndb.BooleanProperty(default=False)
 	salt_passkey  = ndb.StringProperty(default='')
+	emailVerified = ndb.BooleanProperty(default=False)
+	pristine      = ndb.BooleanProperty(default=True)  # once user first updates Profile, it's not pristine anymore
 
 class ProfileMsg(messages.Message):
 	userId        = messages.StringField(1)
@@ -32,6 +34,7 @@ class ProfileMsg(messages.Message):
 	ntrp          = messages.FloatField(6)
 	accessToken   = messages.StringField(7)
 	loggedIn      = messages.BooleanField(8)
+	emailVerified = messages.BooleanField(9)
 
 class CreateAccountMsg(messages.Message):
 	email     = messages.StringField(1)
