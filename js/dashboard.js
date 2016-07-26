@@ -1,6 +1,9 @@
 'use strict';
 
-// Declare classes
+///////////////////////////////////////////////////////
+// Classes
+///////////////////////////////////////////////////////
+
 var Match = function(singles, date, time, location, players, confirmed, key) {
 	this.singles = singles;
 	this.date = date;
@@ -12,7 +15,10 @@ var Match = function(singles, date, time, location, players, confirmed, key) {
 };
 
 
+///////////////////////////////////////////////////////
 // AngularJS
+///////////////////////////////////////////////////////
+
 var app = angular.module('dashboard', ['ngRoute']);
 
 app.config(['$routeProvider', function($routeProvider) {
@@ -188,6 +194,10 @@ app.controller('MatchCtrl', function(currentMatch) {
 });
 
 
+///////////////////////////////////////////////////////
+// User Authentication
+///////////////////////////////////////////////////////
+
 // Update dashboard front-end with data from back-end, after authentication is complete
 // This function is called after authentication step
 function onAuthSuccess(accessToken) {
@@ -297,11 +307,8 @@ function onAuthSuccess(accessToken) {
 	}
 }
 
-
-// Any back-end API functionality must be executed -after- the gapi is loaded
-// Execute authentication steps
-function onGapiLoad() {
-	// First try Facebook authentication
+// Try FB auth
+function tryFb() {
 	FB.getLoginStatus(function(response) {
 		if (response.status === 'connected') {
 			// Authenticated
@@ -309,23 +316,29 @@ function onGapiLoad() {
 
 			onAuthSuccess(accessToken);
 		} else {
-			// Not authenticated with FB, check if auth'ed with custom account
-			// If not, redirect to login page
-			var accessToken = localStorage.tennisJwt;
-
-			if (accessToken === undefined) {
-				window.location = '/login';
-			} else {
-				// Verify token with back-end
-				gapi.client.tennis.verifyToken({accessToken: accessToken}).execute(function(resp) {
-					if (resp.result.data === false) {
-						window.location = '/login';
-					} else {
-						// Token is valid, proceed
-						onAuthSuccess(accessToken);
-					}
-				});
-			}
+			window.location = '/login';
 		}
 	});
+}
+
+// Any back-end API functionality must be executed -after- the gapi is loaded
+// Execute authentication steps
+function onGapiLoad() {
+	// First try custom account authentication
+	// If custom auth fails or user logged out of custom account session, try FB auth
+	var accessToken = localStorage.tennisJwt;
+
+	if (accessToken === undefined) {
+		tryFb();
+	} else {
+		// Verify token and user login status with back-end
+		gapi.client.tennis.verifyToken({accessToken: accessToken}).execute(function(resp) {
+			if (resp.result.data === false) {
+				tryFb();
+			} else {
+				// Token is valid and user is logged-in, proceed
+				onAuthSuccess(accessToken);
+			}
+		});
+	}
 }

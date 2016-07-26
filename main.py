@@ -129,14 +129,19 @@ class TennisApi(remote.Service):
 	@endpoints.method(AccessTokenMsg, BooleanMsg, path='',
 		http_method='POST', name='verifyToken')
 	def verifyToken(self, request):
-		""" Verify validity of custom account token, return True (valild) or False (invalid) """
+		""" Verify validity of custom account token, check if user is logged in. Return True/False. """
 		status = BooleanMsg()  # return status
 		status.data = False  # default to invalid (False)
 
 		ca_payload = self._decodeToken(request.accessToken)
 		if ca_payload is not None:
 			if 'userId' in ca_payload:
-				status.data = True
+				# Check if user is logged in
+				user_id = ca_payload['userId']
+				profile_key = ndb.Key(Profile, user_id)
+				profile = profile_key.get()
+				if profile is not None:
+					status.data = profile.loggedIn
 
 		return status
 
@@ -369,7 +374,8 @@ class TennisApi(remote.Service):
 			contactEmail = email,
 			firstName = first_name,
 			lastName = last_name,
-			loggedIn = True
+			loggedIn = True,
+			emailVerified = False
 		)
 		profile.put()
 
@@ -380,15 +386,6 @@ class TennisApi(remote.Service):
 	###################################################################
 	# Profile Objects
 	###################################################################
-
-	def _copyProfileToForm(self, prof):
-		"""Copy relevant fields from Profile to ProfileMsg."""
-		pf = ProfileMsg()
-		for field in pf.all_fields():
-			if hasattr(prof, field.name):
-				setattr(pf, field.name, getattr(prof, field.name))
-		pf.check_initialized()
-		return pf
 
 	@endpoints.method(AccessTokenMsg, ProfileMsg,
 			path='', http_method='POST', name='getProfile')
@@ -406,12 +403,21 @@ class TennisApi(remote.Service):
 		if not profile:
 			return ProfileMsg()
 
-		return self._copyProfileToForm(profile)
+		# Else, copy profile to ProfileForm, and return it
+		pf = ProfileMsg()
+		for field in pf.all_fields():
+			if hasattr(profile, field.name):
+				setattr(pf, field.name, getattr(profile, field.name))
+		pf.check_initialized()
+		return pf
 
-	@endpoints.method(ProfileMsg, ProfileMsg,
+	@endpoints.method(ProfileMsg, StringMsg,
 			path='', http_method='POST', name='updateProfile')
 	def updateProfile(self, request):
 		"""Update user profile."""
+		status = StringMsg()
+		status.data = 'normal'
+
 		token = request.accessToken
 		user_id = self._getUserId(token)
 
@@ -437,10 +443,12 @@ class TennisApi(remote.Service):
 			profile.pristine = False
 			self._emailVerif(profile)
 
+			status.data = 'email_verif|' + profile.contactEmail
+
 		# Save updated profile to datastore
 		profile.put()
 
-		return self._copyProfileToForm(profile)
+		return status
 
 
 	###################################################################

@@ -14,6 +14,9 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
+		<!-- Google reCAPTCHA -->
+		<script src='https://www.google.com/recaptcha/api.js'></script>
+
 		<!-- My own css -->
 		<link rel="stylesheet" type="text/css" href="/css/style.css">
 
@@ -56,6 +59,10 @@
 							<label>Password</label>
 							<input type="password" class="form-control" id="password" name="password" ng-model="lgn.password" placeholder="Password" required>
 						</fieldset>
+
+						<!-- reCAPTCHA widget -->
+						<div class="g-recaptcha" data-sitekey="6LdZ7iUTAAAAALrC1FAXoVrsEGzhNQrDK8vB_vx_" ng-show="!loginForm.email.$pristine"></div>
+						<br ng-show="!loginForm.email.$pristine">
 
 						<div><em class="error" id="login-status"></em></div>
 
