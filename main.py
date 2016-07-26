@@ -33,6 +33,7 @@ from models import AccessTokenMsg
 
 # Custom accounts
 from settings import CA_SECRET
+from settings import EMAIL_VERIF_SECRET
 # Facebook
 from settings import FB_APP_ID
 from settings import FB_APP_SECRET
@@ -61,6 +62,14 @@ class TennisApi(remote.Service):
 
 	def _emailVerif(self, profile):
 		""" Send verification email, given reference to Profile object. Return success True/False. """
+		# Generate JWT w/ payload of userId and email, secret is EMAIL_VERIF_SECRET
+		token = jwt.encode(
+			{'userId': profile.userId, 'contactEmail': profile.contactEmail},
+			EMAIL_VERIF_SECRET,
+			algorithm='HS256'
+		)
+
+		# Create SparkPost request to send verification email
 		payload = {
 			'recipients': [{
 				'address': {
@@ -69,6 +78,7 @@ class TennisApi(remote.Service):
 				},
 				'substitution_data': {
 					'first_name': profile.firstName,
+					'token':      token,
 				},
 			}],
 			'content': {
@@ -80,6 +90,7 @@ class TennisApi(remote.Service):
 			'Authorization': SPARKPOST_SECRET,
 			'Content-Type': 'application/json',
 		}
+
 		# POST to SparkPost API
 		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
 		try:
@@ -96,6 +107,38 @@ class TennisApi(remote.Service):
 			return False
 
 		return True
+
+
+	@endpoints.method(AccessTokenMsg, StringMsg, path='',
+		http_method='POST', name='verifyEmailToken')
+	def verifyEmailToken(self, request):
+		""" Verify email token, to verify email address. Return email address string or 'error' """
+		status = StringMsg()  # return status
+		status.data = 'error'  # default to error
+
+		# Decode the JWT token
+		try:
+			payload = jwt.decode(request.accessToken, EMAIL_VERIF_SECRET, algorithm='HS256')
+		except:
+			return status
+
+		# If valid JWT token, extract the info and update DB if applicable
+		user_id = payload['userId']
+		email = payload['contactEmail']
+
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# If user changed email and clicked on old email verif link, this request is invalid
+		if profile.contactEmail != email:
+			return status
+
+		# If we get here then email is verified. Update DB and return successful status
+		profile.emailVerified = True
+		profile.put()
+
+		status.data = email
+		return status
 
 
 	###################################################################
@@ -189,6 +232,7 @@ class TennisApi(remote.Service):
 			contactEmail = request.email,
 			salt_passkey = salt_passkey,
 			loggedIn = True,
+			emailVerified = False,
 		).put()
 
 		# Generate user access token (extra_secret = salt)

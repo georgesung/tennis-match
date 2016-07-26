@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- Include jQuery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+		<!-- Using Bootstrap CDN to include Bootstrap -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+		<!-- My own css -->
+		<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+		<title>Login</title>
+	</head>
+	<body ng-app="emailVerif">
+		<div class="container" id="emailVerif" ng-controller="EvCtrl as ev">
+			<h4>Verifying email...</h4><br>
+
+			<p id="status"></p>
+		</div>
+
+		<script src="/js/settings.js"></script>
+		<script src="/js/email_verif.js"></script>
+
+		<!-- Google App Engine API -->
+		<script>
+		function init() {
+			gapi.client.load('tennis', 'v1', onGapiLoad, '//' + window.location.host + '/_ah/api');
+			gapi.client.load('oauth2', 'v2', null);
+		};
+		</script>
+		<script src="https://apis.google.com/js/client.js?onload=init"></script>
+	</body>
+</html>

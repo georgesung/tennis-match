@@ -42,6 +42,11 @@ handlers:
   upload: profile\.html
   secure: always
 
+- url: /email_verif
+  static_files: email_verif.html
+  upload: email_verif\.html
+  secure: always
+
 - url: /_ah/spi/.*
   script: main.api
   secure: always
