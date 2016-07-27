@@ -1,0 +1,4 @@
+cron:
+#- description: daily match reminders and match scrub
+#  url: /cron/match_reminder_scrub
+#  schedule: every day 09:00
