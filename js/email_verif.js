@@ -16,7 +16,6 @@ function getParameterByName(name, url) {
 function onGapiLoad() {
 	// Get token value from the URL
 	var token = getParameterByName('token');
-	console.log('hi');
 
 	// Call back-end API to verify email token
 	gapi.client.tennis.verifyEmailToken({'accessToken': token}).
@@ -25,8 +24,6 @@ function onGapiLoad() {
 			console.log(resp.result.data);
 			if (resp.result.data === 'error') {
 				// Email verif fail
-				console.log('really?');
-
 				status = 'Invalid link. Perhaps you changed your email in your profile?'
 
 				$('#status').html(status);

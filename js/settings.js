@@ -17,19 +17,37 @@ window.fbAsyncInit = function() {
 }(document, 'script', 'facebook-jssdk'));
 
 function getAccessTokenGlobal() {
-	/* Get access token from FB */
-	var accessToken = '';
+	/* Get valid access token from localStorage or FB. If invalid, redirect to login page. */
+	var accessToken = localStorage.tennisJwt;
 
-	// Facebook authentication
-	FB.getLoginStatus(function(response) {
-		if (response.status === 'connected') {
-			// Authenticated
-			accessToken = response.authResponse.accessToken;
-		} else {
-			// Not authenticated, redirect to login page
-			window.location = '/login';
-		}
-	});
+	if (accessToken === undefined) {
+		//tryFb();
+		FB.getLoginStatus(function(response) {
+			if (response.status === 'connected') {
+				// Authenticated
+				accessToken = response.authResponse.accessToken;
+			} else {
+				// Not authenticated, redirect to login page
+				window.location = '/login';
+			}
+		});
+	} else {
+		// Verify token and user login status with back-end
+		gapi.client.tennis.verifyToken({accessToken: accessToken}).execute(function(resp) {
+			if (resp.result.data === false) {
+				//tryFb();
+				FB.getLoginStatus(function(response) {
+					if (response.status === 'connected') {
+						// Authenticated
+						accessToken = response.authResponse.accessToken;
+					} else {
+						// Not authenticated, redirect to login page
+						window.location = '/login';
+					}
+				});
+			}
+		});
+	}
 
 	return accessToken;
 }

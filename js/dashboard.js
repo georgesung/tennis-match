@@ -1,7 +1,7 @@
 'use strict';
 
 ///////////////////////////////////////////////////////
-// Classes
+// Helper classes and functions
 ///////////////////////////////////////////////////////
 
 var Match = function(singles, date, time, location, players, confirmed, key) {
@@ -13,6 +13,18 @@ var Match = function(singles, date, time, location, players, confirmed, key) {
 	this.confirmed = confirmed;
 	this.key = key;
 };
+
+// Get query strings
+// http://stackoverflow.com/a/901144
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
 
 
 ///////////////////////////////////////////////////////
@@ -240,6 +252,28 @@ function showMatches(accessToken) {
 
 			$scope.summary.filterMatches();
 		});
+
+		// If we only want to show one particular match, url query string will have match_id
+		var matchId = getParameterByName('match_id');
+		if (matchId !== null && matchId !== '') {
+			// Search for match in conf/pend match lists
+			for (var i = 0; i < confirmedMatches.length; i++) {
+				var match = confirmedMatches[i];
+				if (matchId === match.key) {
+					$scope.$apply(function () {
+						$scope.summary.showConfMatch(match);
+					});
+				}
+			}
+			for (var i = 0; i < pendingMatches.length; i++) {
+				var match = pendingMatches[i];
+				if (matchId === match.key) {
+					$scope.$apply(function () {
+						$scope.summary.showPendMatch(match);
+					});
+				}
+			}
+		}
 	});
 
 	// Query all available matches for current user, populate Available Matches
@@ -318,6 +352,9 @@ function tryFb() {
 		if (response.status === 'connected') {
 			// Authenticated
 			var accessToken = response.authResponse.accessToken;
+
+			// Remove custom account token just in case
+			localStorage.removeItem('tennisJwt');
 
 			onAuthSuccess(accessToken);
 		} else {

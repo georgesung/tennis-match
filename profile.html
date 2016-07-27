@@ -43,6 +43,8 @@
 							<p ng-show="profForm.email.$invalid && !profForm.email.$pristine" class="help-block">Valid email is required</p>
 						</fieldset>
 
+						<hr>
+
 						<fieldset class="form-group">
 							<label>First Name</label>
 							<input type="text" class="form-control" id="first-name" name="firstName" ng-model="prof.firstName" placeholder="First Name" required>
@@ -76,7 +78,15 @@
 								data-slider-selection="none"
 								data-slider-tooltip="hide" />
 							<p ng-show="profForm.ntrp.$invalid && !profForm.ntrp.$pristine" class="help-block">NTRP rating is required</p>
-							</fieldset>
+						</fieldset>
+
+						<hr>
+
+						<fieldset class="form-group">
+							<label>Match Reminders/Notifications</label><br>
+							<div><input type="checkbox" id="fb-notif-en" ng-disabled="!prof.fbUser" ng-checked="prof.fbNotifEn"> Enable Facebook notifications</div>
+							<div><input type="checkbox" id="email-notif-en" ng-checked="prof.emailNotifEn"> Enable email notifications<span ng-show="!prof.emailVerified"><em> (email verification required)</em></span></div>
+						</fieldset>
 
 						<button type="submit" class="btn btn-primary" id="update-profile" ng-disabled="profForm.$invalid">Update Profile</button>
 						<button type="button" class="btn btn-default" id="cancel">Cancel</button>

@@ -9,6 +9,9 @@ var app = angular.module('profile', []);
 app.controller('ProfCtrl', function() {
 	var prof = this;
 	prof.accessToken = '';
+	prof.fbUser = false;
+	prof.fbNotifEn = false;
+	prof.emailNotifEn = false;
 
 	prof.submitForm = function(isValid) {
 		if (isValid) {
@@ -21,6 +24,8 @@ app.controller('ProfCtrl', function() {
 			var lastName      = $('#last-name').val();
 			var gender        = $('#gender').val();
 			var ntrp          = parseFloat($('#ntrp').val());
+			var fbNotifEn     = $('#fb-notif-en').is(':checked');
+			var emailNotifEn  = $('#email-notif-en').is(':checked')
 
 			var profile = {
 				'userId':        '',
@@ -31,6 +36,7 @@ app.controller('ProfCtrl', function() {
 				'ntrp':          ntrp,
 				'accessToken':   prof.accessToken,
 				'loggedIn':      true,
+				'notifications': [fbNotifEn, emailNotifEn]
 			};
 
 			// Call back-end API
@@ -86,6 +92,10 @@ function onAuthSuccess(accessToken) {
 					$scope.prof.gender = resp.result.gender;
 					$scope.prof.ntrp = resp.result.ntrp;
 					$scope.prof.emailVerified = resp.result.emailVerified;
+
+					$scope.prof.fbUser = resp.result.userId.slice(0,3) === 'fb_';
+					$scope.prof.fbNotifEn = (resp.result.userId.slice(0,3) === 'fb_') && resp.result.notifications[0];
+					$scope.prof.emailNotifEn = resp.result.notifications[1];
 				});
 
 				$('#ntrp').slider().slider('setValue', resp.result.ntrp);
@@ -99,6 +109,9 @@ function tryFb() {
 		if (response.status === 'connected') {
 			// Authenticated
 			var accessToken = response.authResponse.accessToken;
+
+			// Remove custom account token just in case
+			localStorage.removeItem('tennisJwt');
 
 			onAuthSuccess(accessToken);
 		} else {

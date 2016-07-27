@@ -60,6 +60,57 @@ class TennisApi(remote.Service):
 	# Email Management
 	###################################################################
 
+	def _sendEmail(self, user_id, message, message_type):
+		"""
+		Send generic email to user, given content message, and message type (corresponds to SparkPost template ID)
+		"""
+		# Get profile of user_id
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# If user disabled email notifications or email is unverified, return
+		if not profile.notifications[1] or not profile.emailVerified:
+			return False
+
+		# Create SparkPost request to send notification email
+		payload = {
+			'recipients': [{
+				'address': {
+					'email': profile.contactEmail,
+					'name': profile.firstName + ' ' + profile.lastName,
+				},
+				'substitution_data': {
+					'first_name': profile.firstName,
+					'message':    message,
+				},
+			}],
+			'content': {
+				'template_id': message_type,
+			},
+		}
+		payload_json = json.dumps(payload)
+		headers = {
+			'Authorization': SPARKPOST_SECRET,
+			'Content-Type': 'application/json',
+		}
+
+		# POST to SparkPost API
+		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
+		try:
+			result = urlfetch.Fetch(url, headers=headers, payload=payload_json, method=2)
+		except:
+			raise endpoints.BadRequestException('urlfetch error: Unable to POST to SparkPost')
+			return False
+		data = json.loads(result.content)
+
+		# Determine status of email verification from SparkPost, return True/False
+		if 'errors' in data:
+			return False
+		if data['results']['total_accepted_recipients'] != 1:
+			return False
+
+		return True
+
 	def _emailVerif(self, profile):
 		""" Send verification email, given reference to Profile object. Return success True/False. """
 		# Generate JWT w/ payload of userId and email, secret is EMAIL_VERIF_SECRET
@@ -233,6 +284,7 @@ class TennisApi(remote.Service):
 			salt_passkey = salt_passkey,
 			loggedIn = True,
 			emailVerified = False,
+			notifications = [False, True]
 		).put()
 
 		# Generate user access token (extra_secret = salt)
@@ -320,10 +372,20 @@ class TennisApi(remote.Service):
 		user_id = 'fb_' + data['id']
 		return user_id
 
-	def _postFbNotif(self, fb_user_id, message):
+	def _postFbNotif(self, user_id, message, href):
 		"""
 		Post FB notification with message to user
 		"""
+		# Get profile of user_id
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# Only post FB notif if FB user and user enabled FB notifs
+		if not (user_id[:3] == 'fb_' and profile.notifications[0]):
+			return False
+
+		fb_user_id = user_id[3:]
+
 		# Get App Access Token, different than User Token
 		# https://developers.facebook.com/docs/facebook-login/access-tokens/#apptokens
 		url = 'https://graph.facebook.com/v%s/oauth/access_token?grant_type=client_credentials&client_id=%s&client_secret=%s' % (FB_API_VERSION, FB_APP_ID, FB_APP_SECRET)
@@ -335,7 +397,7 @@ class TennisApi(remote.Service):
 
 		token = json.loads(result.content)['access_token']
 
-		url = 'https://graph.facebook.com/v%s/%s/notifications?access_token=%s&template=%s&href=login' % (FB_API_VERSION, fb_user_id, token, message)
+		url = 'https://graph.facebook.com/v%s/%s/notifications?access_token=%s&template=%s&href=%s' % (FB_API_VERSION, fb_user_id, token, message, href)
 		try:
 			result = urlfetch.Fetch(url, method=2)
 		except:
@@ -377,13 +439,13 @@ class TennisApi(remote.Service):
 		try:
 			result = urlfetch.Fetch(url, method=1)
 		except:
-			print('urlfetch error')
+			raise endpoints.BadRequestException('urlfetch error')
 			return status
 
 		data = json.loads(result.content)
 
 		if 'error' in data:
-			print('FB OAuth token error')
+			raise endpoints.BadRequestException('FB OAuth token error')
 			return status
 
 		user_id = 'fb_' + data['id']
@@ -419,9 +481,9 @@ class TennisApi(remote.Service):
 			firstName = first_name,
 			lastName = last_name,
 			loggedIn = True,
-			emailVerified = False
-		)
-		profile.put()
+			emailVerified = False,
+			notifications = [True, False]
+		).put()
 
 		status.data = 'new_user'
 		return status
@@ -598,10 +660,13 @@ class TennisApi(remote.Service):
 			if other_player == user_id:
 				continue
 
-			if other_player[3:] == 'fb_':
-				# FB notification
-				fb_user_id = other_player[3:]
-				self._postFbNotif(fb_user_id, urlquote(player_name + ' has joined your match'))
+			match_url = '?match_id=' + match_key
+			email_message = '%s has <b>joined</b> your match. To view your match, <a href="http://www.georgesungtennis.com/%s">click here</a>.' % (player_name, match_url)
+
+			# Try FB and email notifications
+			# The functions themselves will test if FB user and/or if they enabled the notification
+			self._postFbNotif(other_player, urlquote(player_name + ' has joined your match'), match_url)
+			self._sendEmail(other_player, email_message, 'notification')
 
 		# Return true, for success
 		status = BooleanMsg()
@@ -661,13 +726,17 @@ class TennisApi(remote.Service):
 		profile.put()
 
 		if not match_removed:
-			# Notify all other players that current user/player has joined the match
+			# Notify all other players that current user/player has left the match
 			player_name = profile.firstName + ' ' + profile.lastName
 			for other_player in match.players:
-				if other_player[3:] == 'fb_':
-					# FB notification
-					fb_user_id = other_player[3:]
-					self._postFbNotif(fb_user_id, urlquote(player_name + ' has left your match'))
+
+				match_url = '?match_id=' + match_key
+				email_message = '%s has <b>left</b> your match. To view your match, <a href="http://www.georgesungtennis.com/%s">click here</a>.' % (player_name, match_url)
+
+				# Try FB and email notifications
+				# The functions themselves will test if FB user and/or if they enabled the notification
+				self._postFbNotif(other_player, urlquote(player_name + ' has left your match'), match_url)
+				self._sendEmail(other_player, email_message, 'notification')
 
 		# Return true, for success (how can it fail?)
 		status = BooleanMsg()
@@ -771,6 +840,10 @@ class TennisApi(remote.Service):
 		for match in query:
 			# Ignore matches current user is already participating in
 			if profile.userId in match.players:
+				continue
+
+			# Ignore matches that are full
+			if (match.singles and len(match.players) == 2) or (not match.singles and len(match.players) == 4):
 				continue
 
 			self._appendMatchesMsg(match, matches_msg)

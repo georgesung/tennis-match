@@ -23,6 +23,7 @@ class Profile(ndb.Model):
 	loggedIn      = ndb.BooleanProperty(default=False)
 	salt_passkey  = ndb.StringProperty(default='')
 	emailVerified = ndb.BooleanProperty(default=False)
+	notifications = ndb.BooleanProperty(repeated=True)  # [fb_notif_en, email_notif_en]
 	pristine      = ndb.BooleanProperty(default=True)  # once user first updates Profile, it's not pristine anymore
 
 class ProfileMsg(messages.Message):
@@ -35,6 +36,7 @@ class ProfileMsg(messages.Message):
 	accessToken   = messages.StringField(7)
 	loggedIn      = messages.BooleanField(8)
 	emailVerified = messages.BooleanField(9)
+	notifications = messages.BooleanField(10, repeated=True)
 
 class CreateAccountMsg(messages.Message):
 	email     = messages.StringField(1)

@@ -46,6 +46,9 @@ function statusChangeCallback(response) {
 		// Logged into your app and Facebook.
 		var accessToken = response.authResponse.accessToken;
 
+		// Remove custom account token just in case
+		localStorage.removeItem('tennisJwt');
+
 		// Call back-end API
 		gapi.client.tennis.fbLogin({accessToken: accessToken}).execute(function(resp) {
 			var status = resp.result.data
