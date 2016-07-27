@@ -487,7 +487,7 @@ class TennisApi(remote.Service):
 			profile.pristine = False
 			self._emailVerif(profile)
 
-			status.data = 'email_verif|' + profile.contactEmail
+			status.data = 'email_verif'
 
 		# Save updated profile to datastore
 		profile.put()

@@ -36,7 +36,25 @@ app.controller('ProfCtrl', function() {
 			// Call back-end API
 			gapi.client.tennis.updateProfile(profile).
 				execute(function(resp) {
-					window.location = '/';
+					// If user changed email, notify user
+					// Else just redirect to homepage
+					if (resp.result.data === 'email_verif') {
+						bootbox.dialog({
+							message: "Email address changed (or new user), verification email was sent to " + contactEmail,
+							buttons: {
+								ok: {
+									closeButton: false,
+									label: "OK",
+									className: "btn-default",
+									callback: function() {
+										window.location = '/';
+									}
+								}
+							}
+						});
+					} else {
+						window.location = '/';
+					}
 				});
 		}
 	}
