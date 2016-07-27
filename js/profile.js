@@ -67,6 +67,7 @@ function onAuthSuccess(accessToken) {
 					$scope.prof.lastName = resp.result.lastName;
 					$scope.prof.gender = resp.result.gender;
 					$scope.prof.ntrp = resp.result.ntrp;
+					$scope.prof.emailVerified = resp.result.emailVerified;
 				});
 
 				$('#ntrp').slider().slider('setValue', resp.result.ntrp);

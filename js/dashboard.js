@@ -60,6 +60,7 @@ app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 	var summary = this;
 
 	summary.firstName = '';
+	summary.emailVerified = false;
 	summary.confirmedMatches = [];
 	summary.pendingMatches = [];
 	summary.availableMatches = [];
@@ -201,7 +202,7 @@ app.controller('MatchCtrl', function(currentMatch) {
 // Show confirmed/pending/available matches for current user (only call after auth'ed)
 function showMatches(accessToken) {
 	var $scope = $('#dashboard').scope();
-	
+
 	// Get all matches for current user, populate Confirmed Matches and Pending Matches
 	gapi.client.tennis.getMyMatches({accessToken: accessToken}).execute(function(resp) {
 		if (resp.result.singles === undefined) { return; }
@@ -301,6 +302,7 @@ function onAuthSuccess(accessToken) {
 				// Show the dashboard, update greeting
 				$scope.$apply(function () {
 					$scope.summary.firstName = resp.result.firstName;
+					$scope.summary.emailVerified = resp.result.emailVerified;
 					$scope.summary.showDashboard = true;
 				});
 

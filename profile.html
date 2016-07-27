@@ -35,7 +35,7 @@
 					<form id="profForm" name="profForm" ng-submit="prof.submitForm(profForm.$valid)" novalidate>
 
 						<fieldset class="form-group">
-							<label> Email</label>
+							<label>Email <em><small><span ng-show="prof.emailVerified">(verified)</span><span ng-show="!prof.emailVerified">(unverified)</span></small></em></label>
 							<input type="email" class="form-control" id="contact-email" name="email" ng-model="prof.email" placeholder="Email" required>
 							<p ng-show="profForm.email.$invalid && !profForm.email.$pristine" class="help-block">Valid email is required</p>
 						</fieldset>

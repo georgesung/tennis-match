@@ -13,7 +13,7 @@ Please wait...
 
 	<div class="row">
 		<div class="col-xs-6">
-			<i><small id="greeting">Welcome {{summary.firstName}}</small></i>
+			<i><small id="greeting">Welcome {{summary.firstName}}<span ng-show="!summary.emailVerified">. Please verify your email address by visiting the link in your inbox.</span></small></i>
 		</div>
 		<div class="col-xs-6 text-right">
 			<div class="btn-group">
