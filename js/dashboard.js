@@ -229,7 +229,7 @@ app.controller('CpwCtrl', function(accessToken) {
 				var callback = function() {};
 
 				if (resp.result.data === 'success') {
-					message = 'Password change successful';
+					message = 'Password change successful, please login again';
 					callback = function() { window.location = '/'; };
 				} else if (resp.result.data === 'old_pw_wrong') {
 					message = 'Incorrect current password';

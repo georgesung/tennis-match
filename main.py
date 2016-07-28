@@ -163,6 +163,50 @@ class TennisApi(remote.Service):
 
 		return True
 
+	def _emailPwChange(self, profile):
+		""" Send password change notification email. Return success True/False. """
+		# If user email is unverified, return
+		if not profile.emailVerified:
+			return False
+
+		# Create SparkPost request to send pw change notification email
+		payload = {
+			'recipients': [{
+				'address': {
+					'email': profile.contactEmail,
+					'name': profile.firstName + ' ' + profile.lastName,
+				},
+				'substitution_data': {
+					'first_name': profile.firstName,
+				},
+			}],
+			'content': {
+				'template_id': 'password-change-notification',
+			},
+		}
+		payload_json = json.dumps(payload)
+		headers = {
+			'Authorization': SPARKPOST_SECRET,
+			'Content-Type': 'application/json',
+		}
+
+		# POST to SparkPost API
+		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
+		try:
+			result = urlfetch.Fetch(url, headers=headers, payload=payload_json, method=2)
+		except:
+			raise endpoints.BadRequestException('urlfetch error: Unable to POST to SparkPost')
+			return False
+		data = json.loads(result.content)
+
+		# Determine status of email verification from SparkPost, return True/False
+		if 'errors' in data:
+			return False
+		if data['results']['total_accepted_recipients'] != 1:
+			return False
+
+		return True
+
 
 	@endpoints.method(AccessTokenMsg, StringMsg, path='',
 		http_method='POST', name='verifyEmailToken')
@@ -390,13 +434,21 @@ class TennisApi(remote.Service):
 			status.data = 'old_pw_wrong'
 			return status
 
-		# If passwords match, salt & hash new password and update DB
+		# If passwords match, salt & hash new password
 		new_salt = Crypto.Random.new().read(16)
 		new_passkey = KDF.PBKDF2(request.newPw, new_salt).encode('hex')
 		new_salt_passkey = new_salt.encode('hex') + '|' + new_passkey
-
 		profile.salt_passkey = new_salt_passkey
+
+		# Also generate new session ID
+		session_id = Crypto.Random.new().read(16).encode('hex')
+		profile.session_id = session_id
+
+		# Update DB
 		profile.put()
+
+		# Send user an email to notify password change
+		self._emailPwChange(profile)
 
 		# Return success status
 		status.data = 'success'
