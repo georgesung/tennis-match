@@ -55,7 +55,7 @@ $('#back-button').click(function() {
 
 $('#cancel-button').click(function() {
 	bootbox.dialog({
-		message: "Are you sure? WARNING: Last-minute cancellations result in bad karma.",
+		message: "Are you sure? WARNING: Last-minute cancellations are rude.",
 		buttons: {
 			yes: {
 				label: "Yes",

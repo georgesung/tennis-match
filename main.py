@@ -60,9 +60,10 @@ class TennisApi(remote.Service):
 	# Email Management
 	###################################################################
 
-	def _sendEmail(self, user_id, message, message_type):
+	def _sendMatchUpdateEmail(self, user_id, message, person, action):
 		"""
-		Send generic email to user, given content message, and message type (corresponds to SparkPost template ID)
+		Send match update email to user, via match-update SparkPost template
+		Given user, message content, person-of-interest, action (e.g. joined/left)
 		"""
 		# Get profile of user_id
 		profile_key = ndb.Key(Profile, user_id)
@@ -82,10 +83,12 @@ class TennisApi(remote.Service):
 				'substitution_data': {
 					'first_name': profile.firstName,
 					'message':    message,
+					'person':     person,
+					'action':     action,
 				},
 			}],
 			'content': {
-				'template_id': message_type,
+				'template_id': 'match-update',
 			},
 		}
 		payload_json = json.dumps(payload)
@@ -675,7 +678,7 @@ class TennisApi(remote.Service):
 			# Try FB and email notifications
 			# The functions themselves will test if FB user and/or if they enabled the notification
 			self._postFbNotif(other_player, urlquote(player_name + ' has joined your match'), match_url)
-			self._sendEmail(other_player, email_message, 'notification')
+			self._sendMatchUpdateEmail(other_player, email_message, player_name, 'joined')
 
 		# Return true, for success
 		status = BooleanMsg()
@@ -745,7 +748,7 @@ class TennisApi(remote.Service):
 				# Try FB and email notifications
 				# The functions themselves will test if FB user and/or if they enabled the notification
 				self._postFbNotif(other_player, urlquote(player_name + ' has left your match'), match_url)
-				self._sendEmail(other_player, email_message, 'notification')
+				self._sendMatchUpdateEmail(other_player, email_message, player_name, 'left')
 
 		# Return true, for success (how can it fail?)
 		status = BooleanMsg()
