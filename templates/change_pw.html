@@ -1,0 +1,48 @@
+<!-- Include JQuery form validation -->
+<!--script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"></script-->
+
+<!-- Using Bootstrap CDN to include Bootstrap -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+<!-- My own css -->
+<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+<!-- Bootbox: http://bootboxjs.com -->
+<script src="/js/bootbox.min.js"></script>
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<h4>Change Password</h4>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<form id="changePwForm" name="changePwForm" ng-submit="cpw.submitForm()">
+
+				<fieldset class="form-group">
+					<label>Current Password</label>
+					<input type="password" class="form-control" id="oldPassword" name="oldPassword" ng-model="cpw.oldPassword" placeholder="Current Password" required>
+				</fieldset>
+
+				<fieldset class="form-group">
+					<label>New Password</label>
+					<input type="password" class="form-control" id="password" name="password" ng-model="cpw.password" placeholder="New Password" required>
+				</fieldset>
+
+				<fieldset class="form-group">
+					<label>Confirm New Password</label>
+					<input type="password" class="form-control" id="confPassword" name="confPassword" placeholder="Confirm New Password" required>
+				</fieldset>
+
+				<div><em id="status"></em></div>
+
+				<button type="submit" class="btn btn-primary" id="change-pw">Change Password</button>
+				<button type="button" class="btn btn-default" id="cancel">Cancel</button>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script src="js/change_pw.js"></script>

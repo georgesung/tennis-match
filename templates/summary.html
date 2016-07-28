@@ -24,6 +24,7 @@ Please wait...
 				</button>
 				<ul class="dropdown-menu pull-right">
 					<li><a href="/profile">My Profile</a></li>
+					<li ng-show="!summary.fbUser" ng-click="summary.showChangePw()"><a>Change Password</a></li>
 					<li ng-click="summary.showAbout()"><a>About/FAQ</a></li>
 					<li role="separator" class="divider"></li>
 					<li ng-click="summary.logout()"><a>Sign Out</a></li>

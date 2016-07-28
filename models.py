@@ -47,6 +47,11 @@ class PasswordMsg(messages.Message):
 	email    = messages.StringField(1)
 	password = messages.StringField(2)
 
+class ChangePasswordMsg(messages.Message):
+	oldPw       = messages.StringField(1)
+	newPw       = messages.StringField(2)
+	accessToken = messages.StringField(3)
+	
 
 # Access token message
 class AccessTokenMsg(messages.Message):

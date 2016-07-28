@@ -24,6 +24,7 @@ from models import Profile
 from models import ProfileMsg
 from models import CreateAccountMsg
 from models import PasswordMsg
+from models import ChangePasswordMsg
 from models import Match
 from models import MatchMsg
 from models import MatchesMsg
@@ -351,6 +352,43 @@ class TennisApi(remote.Service):
 		profile.put()
 
 		status.data = True
+		return status
+
+	@endpoints.method(ChangePasswordMsg, StringMsg, path='',
+		http_method='POST', name='changePassword')
+	def changePassword(self, request):
+		""" Change password """
+		status = StringMsg()
+		status.data = 'error'
+
+		# Get user profile
+		user_id = self._getUserId(request.accessToken)
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# Not sure how this would happen, but it would be an error
+		if not profile:
+			return status
+		
+		# Check if provided old password matches user's current password
+		db_salt, db_passkey = profile.salt_passkey.split('|')
+		passkey = KDF.PBKDF2(request.oldPw, db_salt.decode('hex')).encode('hex')
+
+		# Passwords don't match, return
+		if passkey != db_passkey:
+			status.data = 'old_pw_wrong'
+			return status
+
+		# If passwords match, salt & hash new password and update DB
+		new_salt = Crypto.Random.new().read(16)
+		new_passkey = KDF.PBKDF2(request.newPw, new_salt).encode('hex')
+		new_salt_passkey = new_salt.encode('hex') + '|' + new_passkey
+
+		profile.salt_passkey = new_salt_passkey
+		profile.put()
+
+		# Return success status
+		status.data = 'success'
 		return status
 
 

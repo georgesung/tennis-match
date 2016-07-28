@@ -40,6 +40,7 @@ app.config(['$routeProvider', function($routeProvider) {
 		.when('/conf_match',    {templateUrl: '/templates/conf_match.html', controller: 'MatchCtrl as match'})
 		.when('/pend_match',    {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
 		.when('/avail_match',   {templateUrl: '/templates/avail_match.html', controller: 'MatchCtrl as match'})
+		.when('/change_pw',     {templateUrl: '/templates/change_pw.html', controller: 'CpwCtrl as cpw'})
 		.when('/about',         {templateUrl: '/templates/about.html'})
 		.otherwise({redirectTo:'/'});
 }]);
@@ -73,6 +74,7 @@ app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 
 	summary.firstName = '';
 	summary.emailVerified = false;
+	summary.fbUser = false;
 	summary.confirmedMatches = [];
 	summary.pendingMatches = [];
 	summary.availableMatches = [];
@@ -122,6 +124,10 @@ app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 		currentMatch.set(match);
 		window.location = '#/avail_match';
 	};
+
+	summary.showChangePw = function() {
+		window.location = '#/change_pw';
+	}
 
 	summary.showAbout = function() {
 		window.location = '#/about';
@@ -204,6 +210,46 @@ app.controller('ReqCtrl', function(accessToken) {
 app.controller('MatchCtrl', function(currentMatch) {
 	var match = this;
 	match.currentMatch = currentMatch.get();
+});
+
+app.controller('CpwCtrl', function(accessToken) {
+	var cpw = this;
+	
+	cpw.submitForm = function() {
+		var changePasswordMsg = {
+			'oldPw': cpw.oldPassword,
+			'newPw': cpw.password,
+			'accessToken': accessToken.get()
+		}
+
+		// Call back-end API
+		gapi.client.tennis.changePassword(changePasswordMsg).
+			execute(function(resp) {
+				var message = '';
+				var callback = function() {};
+
+				if (resp.result.data === 'success') {
+					message = 'Password change successful';
+					callback = function() { window.location = '/'; };
+				} else if (resp.result.data === 'old_pw_wrong') {
+					message = 'Incorrect current password';
+				} else {
+					message = 'Unknown error, please refresh homepage and try again';
+				}
+
+				bootbox.dialog({
+					closeButton: false,
+					message: message,
+					buttons: {
+						ok: {
+							label: "OK",
+							className: "btn-default",
+							callback: callback
+						}
+					}
+				});
+			});
+	}
 });
 
 
@@ -337,6 +383,7 @@ function onAuthSuccess(accessToken) {
 				$scope.$apply(function () {
 					$scope.summary.firstName = resp.result.firstName;
 					$scope.summary.emailVerified = resp.result.emailVerified;
+					$scope.summary.fbUser = resp.result.userId.slice(0,3) === 'fb_';
 					$scope.summary.showDashboard = true;
 				});
 

@@ -47,7 +47,7 @@ app.controller('ProfCtrl', function() {
 					if (resp.result.data === 'email_verif') {
 						bootbox.dialog({
 							closeButton: false,
-							message: "New email address: Verification email was sent to " + contactEmail,
+							message: "New email address, verification email was sent to " + contactEmail,
 							buttons: {
 								ok: {
 									label: "OK",
