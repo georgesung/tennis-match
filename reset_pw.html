@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- Include jQuery & form validation -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"></script>
+
+		<!-- Using Bootstrap CDN to include Bootstrap -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+		<!-- Google reCAPTCHA -->
+		<script src='https://www.google.com/recaptcha/api.js'></script>
+
+		<!-- My own css -->
+		<link rel="stylesheet" type="text/css" href="/css/style.css">
+
+		<title>Reset Password</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<h4>Reset Password</h4>
+					<p>Please enter a new password</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12">
+					<form id="resetPwForm" name="resetPwForm" onsubmit="return false">
+						<fieldset class="form-group">
+							<label>Password</label>
+							<input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+						</fieldset>
+
+						<fieldset class="form-group">
+							<label>Confirm Password</label>
+							<input type="password" class="form-control" id="confPassword" name="confPassword" placeholder="Confirm Password" required>
+						</fieldset>
+
+						<div><em id="status"></em></div>
+
+						<button type="submit" class="btn btn-primary" id="reset">Reset Password</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<script src="/js/settings.js"></script>
+		<script src="/js/reset_pw.js"></script>
+
+		<!-- Google App Engine API -->
+		<script>
+		function init() {
+			gapi.client.load('tennis', 'v1', null, '//' + window.location.host + '/_ah/api');
+		};
+		</script>
+		<script src="https://apis.google.com/js/client.js?onload=init"></script>
+	</body>
+</html>

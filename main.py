@@ -61,7 +61,31 @@ class TennisApi(remote.Service):
 	# Email Management
 	###################################################################
 
-	def _sendMatchUpdateEmail(self, user_id, message, person, action):
+	def _postToSparkpost(self, payload):
+		""" Post to Sparkpost API. Return True/False status """
+		payload_json = json.dumps(payload)
+		headers = {
+			'Authorization': SPARKPOST_SECRET,
+			'Content-Type': 'application/json',
+		}
+
+		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
+		try:
+			result = urlfetch.Fetch(url, headers=headers, payload=payload_json, method=2)
+		except:
+			raise endpoints.BadRequestException('urlfetch error: Unable to POST to SparkPost')
+			return False
+		data = json.loads(result.content)
+
+		# Determine status from SparkPost, return True/False
+		if 'errors' in data:
+			return False
+		if data['results']['total_accepted_recipients'] != 1:
+			return False
+
+		return True
+
+	def _emailMatchUpdate(self, user_id, message, person, action):
 		"""
 		Send match update email to user, via match-update SparkPost template
 		Given user, message content, person-of-interest, action (e.g. joined/left)
@@ -92,28 +116,8 @@ class TennisApi(remote.Service):
 				'template_id': 'match-update',
 			},
 		}
-		payload_json = json.dumps(payload)
-		headers = {
-			'Authorization': SPARKPOST_SECRET,
-			'Content-Type': 'application/json',
-		}
-
-		# POST to SparkPost API
-		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
-		try:
-			result = urlfetch.Fetch(url, headers=headers, payload=payload_json, method=2)
-		except:
-			raise endpoints.BadRequestException('urlfetch error: Unable to POST to SparkPost')
-			return False
-		data = json.loads(result.content)
-
-		# Determine status of email verification from SparkPost, return True/False
-		if 'errors' in data:
-			return False
-		if data['results']['total_accepted_recipients'] != 1:
-			return False
-
-		return True
+		
+		return self._postToSparkpost(payload)
 
 	def _emailVerif(self, profile):
 		""" Send verification email, given reference to Profile object. Return success True/False. """
@@ -140,28 +144,8 @@ class TennisApi(remote.Service):
 				'template_id': 'email-verif',
 			},
 		}
-		payload_json = json.dumps(payload)
-		headers = {
-			'Authorization': SPARKPOST_SECRET,
-			'Content-Type': 'application/json',
-		}
-
-		# POST to SparkPost API
-		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
-		try:
-			result = urlfetch.Fetch(url, headers=headers, payload=payload_json, method=2)
-		except:
-			raise endpoints.BadRequestException('urlfetch error: Unable to POST to SparkPost')
-			return False
-		data = json.loads(result.content)
-
-		# Determine status of email verification from SparkPost, return True/False
-		if 'errors' in data:
-			return False
-		if data['results']['total_accepted_recipients'] != 1:
-			return False
-
-		return True
+		
+		return self._postToSparkpost(payload)
 
 	def _emailPwChange(self, profile):
 		""" Send password change notification email. Return success True/False. """
@@ -184,28 +168,36 @@ class TennisApi(remote.Service):
 				'template_id': 'password-change-notification',
 			},
 		}
-		payload_json = json.dumps(payload)
-		headers = {
-			'Authorization': SPARKPOST_SECRET,
-			'Content-Type': 'application/json',
+		
+		return self._postToSparkpost(payload)
+
+	def _emailPwReset(self, profile):
+		""" Send password reset link to user's email. Return success True/False. """
+		# If user email is unverified, return
+		if not profile.emailVerified:
+			return False
+
+		# Generate JWT to reset password, expires 30 minutes from now
+		token = jwt.encode({'userId': profile.userId, 'exp': datetime.now() + timedelta(minutes=30)}, CA_SECRET, algorithm='HS256')
+
+		# Create SparkPost request to send pw reset email
+		payload = {
+			'recipients': [{
+				'address': {
+					'email': profile.contactEmail,
+					'name': profile.firstName + ' ' + profile.lastName,
+				},
+				'substitution_data': {
+					'first_name': profile.firstName,
+					'token': token
+				},
+			}],
+			'content': {
+				'template_id': 'password-reset',
+			},
 		}
-
-		# POST to SparkPost API
-		url = 'https://api.sparkpost.com/api/v1/transmissions?num_rcpt_errors=3'
-		try:
-			result = urlfetch.Fetch(url, headers=headers, payload=payload_json, method=2)
-		except:
-			raise endpoints.BadRequestException('urlfetch error: Unable to POST to SparkPost')
-			return False
-		data = json.loads(result.content)
-
-		# Determine status of email verification from SparkPost, return True/False
-		if 'errors' in data:
-			return False
-		if data['results']['total_accepted_recipients'] != 1:
-			return False
-
-		return True
+		
+		return self._postToSparkpost(payload)
 
 
 	@endpoints.method(AccessTokenMsg, StringMsg, path='',
@@ -437,6 +429,92 @@ class TennisApi(remote.Service):
 		# If passwords match, salt & hash new password
 		new_salt = Crypto.Random.new().read(16)
 		new_passkey = KDF.PBKDF2(request.newPw, new_salt).encode('hex')
+		new_salt_passkey = new_salt.encode('hex') + '|' + new_passkey
+		profile.salt_passkey = new_salt_passkey
+
+		# Also generate new session ID
+		session_id = Crypto.Random.new().read(16).encode('hex')
+		profile.session_id = session_id
+
+		# Update DB
+		profile.put()
+
+		# Send user an email to notify password change
+		self._emailPwChange(profile)
+
+		# Return success status
+		status.data = 'success'
+		return status
+
+	@endpoints.method(CreateAccountMsg, StringMsg, path='',
+		http_method='POST', name='forgotPassword')
+	def forgotPassword(self, request):
+		""" Forgot password, send user password reset link via email """
+		status = StringMsg()
+		status.data = 'error'
+
+		# Verify if user passed reCAPTCHA
+		# POST request to Google reCAPTCHA API
+		url = 'https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s' % (GRECAPTCHA_SECRET, request.recaptcha)
+		try:
+			result = urlfetch.Fetch(url, method=2)
+		except:
+			raise endpoints.BadRequestException('urlfetch error: Unable to POST to Google reCAPTCHA')
+			return status
+		data = json.loads(result.content)
+		if not data['success']:
+			status.data = 'recaptcha_fail'
+			return status
+
+		user_id = 'ca_' + request.email
+
+		# Get profile from datastore -- if profile not found, then profile=None
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# Check if profile exists. If not, return status
+		if not profile:
+			status.data = 'invalid_email'
+			return status
+
+		# If email unverified, return status
+		if not profile.emailVerified:
+			status.data = 'unverified_email'
+			return status
+
+		# Send password reset link to user's email
+		if self._emailPwReset(profile):
+			status.data = 'success'
+
+		return status
+
+	@endpoints.method(StringMsg, StringMsg, path='',
+		http_method='POST', name='resetPassword')
+	def resetPassword(self, request):
+		""" Reset password, verify token. Return status. """
+		status = StringMsg()
+		status.data = 'error'
+
+		# Validate and decode token
+		try:
+			payload = jwt.decode(request.accessToken, CA_SECRET, algorithm='HS256')
+		except:
+			status.data = 'invalid_token'
+			return status
+
+
+		# Get user profile
+		user_id = payload['userId']
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# Not sure how this would happen, but it would be an error
+		if not profile:
+			return status
+
+		# Salt & hash new password
+		new_salt = Crypto.Random.new().read(16)
+		new_passkey = KDF.PBKDF2(request.data, new_salt).encode('hex')
 		new_salt_passkey = new_salt.encode('hex') + '|' + new_passkey
 		profile.salt_passkey = new_salt_passkey
 
@@ -779,7 +857,7 @@ class TennisApi(remote.Service):
 			# Try FB and email notifications
 			# The functions themselves will test if FB user and/or if they enabled the notification
 			self._postFbNotif(other_player, urlquote(player_name + ' has joined your match'), match_url)
-			self._sendMatchUpdateEmail(other_player, email_message, player_name, 'joined')
+			self._emailMatchUpdate(other_player, email_message, player_name, 'joined')
 
 		# Return true, for success
 		status = BooleanMsg()
@@ -849,7 +927,7 @@ class TennisApi(remote.Service):
 				# Try FB and email notifications
 				# The functions themselves will test if FB user and/or if they enabled the notification
 				self._postFbNotif(other_player, urlquote(player_name + ' has left your match'), match_url)
-				self._sendMatchUpdateEmail(other_player, email_message, player_name, 'left')
+				self._emailMatchUpdate(other_player, email_message, player_name, 'left')
 
 		# Return true, for success (how can it fail?)
 		status = BooleanMsg()

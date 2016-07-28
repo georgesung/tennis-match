@@ -47,6 +47,16 @@ handlers:
   upload: email_verif\.html
   secure: always
 
+- url: /forgot_pw
+  static_files: forgot_pw.html
+  upload: forgot_pw\.html
+  secure: always
+
+- url: /reset_pw
+  static_files: reset_pw.html
+  upload: reset_pw\.html
+  secure: always
+
 - url: /_ah/spi/.*
   script: main.api
   secure: always

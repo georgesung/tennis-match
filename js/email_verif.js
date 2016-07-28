@@ -21,7 +21,6 @@ function onGapiLoad() {
 	gapi.client.tennis.verifyEmailToken({'accessToken': token}).
 		execute(function(resp) {
 			var status = '';
-			console.log(resp.result.data);
 			if (resp.result.data === 'error') {
 				// Email verif fail
 				status = 'Invalid link. Perhaps you changed your email in your profile?'
