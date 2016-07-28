@@ -230,12 +230,14 @@ class TennisApi(remote.Service):
 		ca_payload = self._decodeToken(request.accessToken)
 		if ca_payload is not None:
 			if 'userId' in ca_payload:
-				# Check if user is logged in
+				# Check if user is logged into valid session
 				user_id = ca_payload['userId']
+				session_id = ca_payload['session_id']
+
 				profile_key = ndb.Key(Profile, user_id)
 				profile = profile_key.get()
 				if profile is not None:
-					status.data = profile.loggedIn
+					status.data = profile.loggedIn and (profile.session_id == session_id)
 
 		return status
 
@@ -276,19 +278,23 @@ class TennisApi(remote.Service):
 
 		salt_passkey = salt.encode('hex') + '|' + passkey
 
+		# Generate new session ID
+		session_id = Crypto.Random.new().read(16).encode('hex')
+
 		# Create new profile for user
 		Profile(
 			key = profile_key,
 			userId = user_id,
 			contactEmail = request.email,
 			salt_passkey = salt_passkey,
+			session_id = session_id,
 			loggedIn = True,
 			emailVerified = False,
 			notifications = [False, True]
 		).put()
 
-		# Generate user access token (extra_secret = salt)
-		token = self._genToken({'userId': user_id})
+		# Generate user access token
+		token = self._genToken({'userId': user_id, 'session_id': session_id})
 
 		# If we get here, means we suceeded
 		status.data = 'success'
@@ -320,12 +326,16 @@ class TennisApi(remote.Service):
 		if passkey != db_passkey:
 			return status
 
+		# Generate new session ID
+		session_id = Crypto.Random.new().read(16).encode('hex')
+		profile.session_id = session_id
+
 		# Update user's status to logged-in
 		profile.loggedIn = True
 		profile.put()
 
-		# Generate user access token (extra_secret = salt)
-		token = self._genToken({'userId': user_id})
+		# Generate user access token
+		token = self._genToken({'userId': user_id, 'session_id': session_id})
 
 		# If we get here, means we suceeded
 		status.data = True
@@ -344,6 +354,7 @@ class TennisApi(remote.Service):
 		# Get Profile from NDB, update login status
 		profile_key = ndb.Key(Profile, user_id)
 		profile = profile_key.get()
+		profile.session_id = 'invalid'
 		profile.loggedIn = False
 		profile.put()
 
