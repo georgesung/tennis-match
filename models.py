@@ -22,6 +22,7 @@ class Profile(ndb.Model):
 	matches       = ndb.StringProperty(repeated=True)  # match keys (store urlsafe version), dynamically changing
 	loggedIn      = ndb.BooleanProperty(default=False)
 	salt_passkey  = ndb.StringProperty(default='')
+	session_id    = ndb.StringProperty(default='')
 	emailVerified = ndb.BooleanProperty(default=False)
 	notifications = ndb.BooleanProperty(repeated=True)  # [fb_notif_en, email_notif_en]
 	pristine      = ndb.BooleanProperty(default=True)  # once user first updates Profile, it's not pristine anymore
