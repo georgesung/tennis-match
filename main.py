@@ -493,6 +493,48 @@ class TennisApi(remote.Service):
 	# Profile Objects
 	###################################################################
 
+	@ndb.transactional(xg=True)
+	def _updateProfile(self, request):
+		"""Update user profile."""
+		status = StringMsg()
+		status.data = 'normal'
+
+		token = request.accessToken
+		user_id = self._getUserId(token)
+
+		# Make sure the incoming message is initialized, raise exception if not
+		request.check_initialized()
+
+		# Get existing profile from datastore
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# Check if email changed. Note custom account users cannot change email.
+		email_change = (profile.contactEmail != request.contactEmail) and (user_id[:3] != 'ca_')
+
+		# Update profile object from the user's form
+		for field in request.all_fields():
+			if field.name == 'userId':
+				continue  # userId is fixed
+			elif user_id[:3] == 'ca_' and field.name == 'contactEmail':
+				continue  # custom account users cannot change email address
+			elif field.name != 'accessToken':
+				setattr(profile, field.name, getattr(request, field.name))
+
+		# If this is user's first time updating profile, or changing email address
+		# then send email verification
+		if profile.pristine or email_change:
+			profile.pristine = False
+			self._emailVerif(profile)
+
+			status.data = 'email_verif'
+
+		# Save updated profile to datastore
+		profile.put()
+
+		return status
+
+
 	@endpoints.method(AccessTokenMsg, ProfileMsg,
 			path='', http_method='POST', name='getProfile')
 	def getProfile(self, request):
@@ -521,40 +563,7 @@ class TennisApi(remote.Service):
 			path='', http_method='POST', name='updateProfile')
 	def updateProfile(self, request):
 		"""Update user profile."""
-		status = StringMsg()
-		status.data = 'normal'
-
-		token = request.accessToken
-		user_id = self._getUserId(token)
-
-		# Make sure the incoming message is initialized, raise exception if not
-		request.check_initialized()
-
-		# Get existing profile from datastore
-		profile_key = ndb.Key(Profile, user_id)
-		profile = profile_key.get()
-
-		email_change = profile.contactEmail != request.contactEmail
-
-		# Update profile object from the user's form
-		for field in request.all_fields():
-			if field.name == 'userId':
-				setattr(profile, 'userId', user_id)
-			elif field.name != 'accessToken':
-				setattr(profile, field.name, getattr(request, field.name))
-
-		# If this is user's first time updating profile, or changing email address (FB user only)
-		# then send email verification
-		if profile.pristine or email_change:
-			profile.pristine = False
-			self._emailVerif(profile)
-
-			status.data = 'email_verif'
-
-		# Save updated profile to datastore
-		profile.put()
-
-		return status
+		return self._updateProfile(request)  # transactional
 
 
 	###################################################################
