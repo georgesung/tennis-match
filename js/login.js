@@ -27,9 +27,10 @@ app.controller('LoginCtrl', function() {
 					localStorage.tennisJwt = resp.result.accessToken;
 					window.location = '/';
 				} else {
-					// Login failed, let user know. Implement forgot password stuff and email verif later.
+					// Login failed, let user know
 					$('#login-status').text('Email/password does not match');
 					$('.container :input, select, button').attr('disabled', false);
+					grecaptcha.reset();
 				}
 			});
 	}
