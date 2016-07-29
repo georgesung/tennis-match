@@ -14,23 +14,32 @@ app.controller('LoginCtrl', function() {
 		var email    = $('#email').val();
 		var password = $('#password').val();
 
+		var recaptcha = grecaptcha.getResponse();
+
 		var passwordMsg = {
 			'email':    email,
 			'password': password,
+			'recaptcha': recaptcha,
 		};
 
 		// Call back-end API
 		gapi.client.tennis.login(passwordMsg).
 			execute(function(resp) {
-				if (resp.result.data) {
-					// Login successful, give user token and redir to dashboard
-					localStorage.tennisJwt = resp.result.accessToken;
-					window.location = '/';
-				} else {
+				if (resp.result.data == 'error') {
 					// Login failed, let user know
 					$('#login-status').text('Email/password does not match');
 					$('.container :input, select, button').attr('disabled', false);
 					grecaptcha.reset();
+
+				} else if (resp.result.data === 'recaptcha_fail') {
+					$('#login-status').text('Please verify you are not a robot');
+					$('.container :input, select, button').attr('disabled', false);
+					grecaptcha.reset();
+
+				} else {
+					// Login successful, give user token and redir to dashboard
+					localStorage.tennisJwt = resp.result.accessToken;
+					window.location = '/';
 				}
 			});
 	}

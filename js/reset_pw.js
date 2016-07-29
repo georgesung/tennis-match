@@ -12,18 +12,24 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-// Any back-end API functionality must be executed -after- the gapi is loaded
-function onGapiLoad() {
-	// Get token value from the URL
-	var token = getParameterByName('token');
+// AngularJS
+var app = angular.module('reset-pw', []);
 
-	// Set button's on-click listener to call back-end
-	$('#reset').click(function() {
+app.controller('ResetPwCtrl', function() {
+	var rpw = this;
+
+	rpw.submitForm = function() {
+		// Get token value from the URL
+		var token = getParameterByName('token');
+
+		// Get user password input
+		var password = $('#password').val();
+
 		// Disable buttons while back-end API call in progress
 		$('.container :input, select, button').attr('disabled', true);
 
 		// Call back-end API
-		gapi.client.tennis.resetPassword({'accessToken': token}).
+		gapi.client.tennis.resetPassword({'data': password, 'accessToken': token}).
 			execute(function(resp) {
 				var status = '';
 
@@ -41,9 +47,8 @@ function onGapiLoad() {
 
 				$('#status').html(status);
 			});
-	});
-	
-}
+	};
+});
 
 // Use Jquery validate plugin to validate form
 // Maybe migrate this to AngularJS?

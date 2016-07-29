@@ -22,8 +22,7 @@ from google.appengine.ext import ndb
 
 from models import Profile
 from models import ProfileMsg
-from models import CreateAccountMsg
-from models import PasswordMsg
+from models import AccountAuthMsg
 from models import ChangePasswordMsg
 from models import Match
 from models import MatchMsg
@@ -116,7 +115,7 @@ class TennisApi(remote.Service):
 				'template_id': 'match-update',
 			},
 		}
-		
+
 		return self._postToSparkpost(payload)
 
 	def _emailVerif(self, profile):
@@ -144,7 +143,7 @@ class TennisApi(remote.Service):
 				'template_id': 'email-verif',
 			},
 		}
-		
+
 		return self._postToSparkpost(payload)
 
 	def _emailPwChange(self, profile):
@@ -168,7 +167,7 @@ class TennisApi(remote.Service):
 				'template_id': 'password-change-notification',
 			},
 		}
-		
+
 		return self._postToSparkpost(payload)
 
 	def _emailPwReset(self, profile):
@@ -196,7 +195,7 @@ class TennisApi(remote.Service):
 				'template_id': 'password-reset',
 			},
 		}
-		
+
 		return self._postToSparkpost(payload)
 
 
@@ -269,7 +268,7 @@ class TennisApi(remote.Service):
 
 		ca_payload = self._decodeToken(request.accessToken)
 		if ca_payload is not None:
-			if 'userId' in ca_payload:
+			if 'userId' in ca_payload and 'session_id' in ca_payload:
 				# Check if user is logged into valid session
 				user_id = ca_payload['userId']
 				session_id = ca_payload['session_id']
@@ -281,7 +280,7 @@ class TennisApi(remote.Service):
 
 		return status
 
-	@endpoints.method(CreateAccountMsg, StringMsg, path='',
+	@endpoints.method(AccountAuthMsg, StringMsg, path='',
 		http_method='POST', name='createAccount')
 	def createAccount(self, request):
 		""" Create new custom account """
@@ -341,12 +340,25 @@ class TennisApi(remote.Service):
 		status.accessToken = token
 		return status
 
-	@endpoints.method(PasswordMsg, BooleanMsg, path='',
+	@endpoints.method(AccountAuthMsg, StringMsg, path='',
 		http_method='POST', name='login')
 	def login(self, request):
 		""" Check username/password to login """
-		status = BooleanMsg()  # return status
-		status.data = False  # default to error (False)
+		status = StringMsg()  # return status
+		status.data = 'error'  # default to error
+
+		# Verify if user passed reCAPTCHA
+		# POST request to Google reCAPTCHA API
+		url = 'https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s' % (GRECAPTCHA_SECRET, request.recaptcha)
+		try:
+			result = urlfetch.Fetch(url, method=2)
+		except:
+			raise endpoints.BadRequestException('urlfetch error: Unable to POST to Google reCAPTCHA')
+			return status
+		data = json.loads(result.content)
+		if not data['success']:
+			status.data = 'recaptcha_fail'
+			return status
 
 		user_id = 'ca_' + request.email
 
@@ -378,7 +390,7 @@ class TennisApi(remote.Service):
 		token = self._genToken({'userId': user_id, 'session_id': session_id})
 
 		# If we get here, means we suceeded
-		status.data = True
+		status.data = 'success'
 		status.accessToken = token
 		return status
 
@@ -416,7 +428,7 @@ class TennisApi(remote.Service):
 		# Not sure how this would happen, but it would be an error
 		if not profile:
 			return status
-		
+
 		# Check if provided old password matches user's current password
 		db_salt, db_passkey = profile.salt_passkey.split('|')
 		passkey = KDF.PBKDF2(request.oldPw, db_salt.decode('hex')).encode('hex')
@@ -446,7 +458,7 @@ class TennisApi(remote.Service):
 		status.data = 'success'
 		return status
 
-	@endpoints.method(CreateAccountMsg, StringMsg, path='',
+	@endpoints.method(AccountAuthMsg, StringMsg, path='',
 		http_method='POST', name='forgotPassword')
 	def forgotPassword(self, request):
 		""" Forgot password, send user password reset link via email """
@@ -501,7 +513,6 @@ class TennisApi(remote.Service):
 		except:
 			status.data = 'invalid_token'
 			return status
-
 
 		# Get user profile
 		user_id = payload['userId']

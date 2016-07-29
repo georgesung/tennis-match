@@ -39,20 +39,16 @@ class ProfileMsg(messages.Message):
 	emailVerified = messages.BooleanField(9)
 	notifications = messages.BooleanField(10, repeated=True)
 
-class CreateAccountMsg(messages.Message):
+class AccountAuthMsg(messages.Message):
 	email     = messages.StringField(1)
 	password  = messages.StringField(2)
 	recaptcha = messages.StringField(3)
-
-class PasswordMsg(messages.Message):
-	email    = messages.StringField(1)
-	password = messages.StringField(2)
 
 class ChangePasswordMsg(messages.Message):
 	oldPw       = messages.StringField(1)
 	newPw       = messages.StringField(2)
 	accessToken = messages.StringField(3)
-	
+
 
 # Access token message
 class AccessTokenMsg(messages.Message):

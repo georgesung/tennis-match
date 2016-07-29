@@ -8,6 +8,9 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.min.js"></script>
 
+		<!-- Include AngularJS -->
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+
 		<!-- Using Bootstrap CDN to include Bootstrap -->
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
@@ -20,8 +23,8 @@
 
 		<title>Reset Password</title>
 	</head>
-	<body>
-		<div class="container">
+	<body ng-app="reset-pw">
+		<div class="container" id="resetPw" ng-controller="ResetPwCtrl as rpw">
 			<div class="row">
 				<div class="col-md-12">
 					<h4>Reset Password</h4>
@@ -30,10 +33,10 @@
 			</div>
 			<div class="row">
 				<div class="col-md-12">
-					<form id="resetPwForm" name="resetPwForm" onsubmit="return false">
+					<form id="resetPwForm" name="resetPwForm" ng-submit="rpw.submitForm()">
 						<fieldset class="form-group">
 							<label>Password</label>
-							<input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+							<input type="password" class="form-control" id="password" name="password" ng-model="fpw.password" placeholder="Password" required>
 						</fieldset>
 
 						<fieldset class="form-group">
