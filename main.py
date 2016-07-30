@@ -990,11 +990,11 @@ class TennisApi(remote.Service):
 	# Queries
 	###################################################################
 
-	def _appendMatchesMsg(self, match, matches_msg):
-		# Ignore matches in the past, or matches that will occur in less than 30 minutes
+	def _appendMatchesMsg(self, match, t_delta, matches_msg):
+		# Ignore matches in the past, or matches that will occur in less than t_delta minutes
 		# Note we store matches in naive time, but datetime.now() returns UTC time,
 		# so we use tzinfo object to convert to local time
-		if match.dateTime - timedelta(minutes=30) < datetime.now(Eastern_tzinfo()).replace(tzinfo=None):
+		if match.dateTime - timedelta(minutes=t_delta) < datetime.now(Eastern_tzinfo()).replace(tzinfo=None):
 			return
 
 		# Convert datetime object into separate date and time strings
@@ -1043,7 +1043,14 @@ class TennisApi(remote.Service):
 		for match_key in profile.matches:
 			match = ndb.Key(urlsafe=match_key).get()
 
-			self._appendMatchesMsg(match, matches_msg)
+			# For confirmed matches, show it up to 1 hour after the match
+			# For pending matches, show it up to the exact time of the match
+			if match.confirmed:
+				t_delta = -60
+			else:
+				t_delta = 0
+
+			self._appendMatchesMsg(match, t_delta, matches_msg)
 
 		return matches_msg
 
@@ -1081,7 +1088,8 @@ class TennisApi(remote.Service):
 			if (match.singles and len(match.players) == 2) or (not match.singles and len(match.players) == 4):
 				continue
 
-			self._appendMatchesMsg(match, matches_msg)
+			# Only show available matches that occur in less than 1 hour from now
+			self._appendMatchesMsg(match, 60, matches_msg)
 
 		return matches_msg
 
