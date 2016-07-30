@@ -38,8 +38,12 @@ app.controller('LoginCtrl', function() {
 
 				} else {
 					// Login successful, give user token and redir to dashboard
-					localStorage.tennisJwt = resp.result.accessToken;
-					window.location = '/';
+					try {
+						localStorage.tennisJwt = resp.result.accessToken;
+						window.location = '/';
+					} catch (e) {
+						alert('Your web browser does not support storing settings locally. In Safari, the most common cause of this is using "Private Browsing Mode". The user account sign-in process will not work in this case, sorry.')
+					}
 				}
 			});
 	}

@@ -886,18 +886,23 @@ class TennisApi(remote.Service):
 	@ndb.transactional(xg=True)
 	def _cancelMatch(self, request):
 		"""Cancel an existing Match, given Match's key.
-		If successful, return true. Fail condition?"""
+		If successful, return true."""
+		status = BooleanMsg()
+		status.data = False
+
 		token = request.accessToken
 		user_id = self._getUserId(token)
 
 		# If any field in request is None, then raise exception
 		if request.data is None:
 			raise endpoints.BadRequestException('Need match ID from request.data')
+			return status
 
 		# Get match key, then get the Match entity from db
 		match_key = request.data
 		match = ndb.Key(urlsafe=match_key).get()
 
+		'''
 		# If cancelling player is the "owner" of the match and match has >1 player,
 		# find new owner to update Match's ntrp
 		if match.players[0] == user_id and len(match.players) > 1:
@@ -908,11 +913,16 @@ class TennisApi(remote.Service):
 				ntrp -= 0.5
 
 			match.ntrp = ntrp
+		'''
 
-		# Update 'players' and 'confirmed' fields (if needed)
+		# Determine if cancelling player is the owner of the match
+		owner_leaving = match.players[0] == user_id
+
+		# Update 'players' and 'confirmed' fields
 		match.players.remove(user_id)
 		match.confirmed = False
 
+		'''
 		# Update Match in ndb
 		match_removed = False
 		if len(match.players) == 0:
@@ -920,30 +930,49 @@ class TennisApi(remote.Service):
 			match_removed = True
 		else:
 			match.put()
+		'''
 
 		# Remove current match key from current user's matches list
-		profile_key = ndb.Key(Profile, user_id)
-		profile = profile_key.get()
+		profile = ndb.Key(Profile, user_id).get()
 		profile.matches.remove(match_key)
 		profile.put()
 
-		if not match_removed:
-			# Notify all other players that current user/player has left the match
-			player_name = profile.firstName + ' ' + profile.lastName
-			for other_player in match.players:
+		# Notify all other players that current user/player has left the match
+		player_name = profile.firstName + ' ' + profile.lastName
+		match_url = '?match_id=' + match_key
 
-				match_url = '?match_id=' + match_key
-				email_message = '%s has <b>left</b> your match. To view your match, <a href="http://www.georgesungtennis.com/%s">click here</a>.' % (player_name, match_url)
+		for other_player in match.players:
+			# Try FB and email notifications
+			# The functions themselves will test if FB user and/or if they enabled the notification
+			if owner_leaving:
+				# FB
+				self._postFbNotif(other_player, urlquote(player_name + ' has cancelled your match'), '')
 
-				# Try FB and email notifications
-				# The functions themselves will test if FB user and/or if they enabled the notification
+				# Email
+				email_message = '%s has <b>cancelled</b> your match. <a href="http://www.georgesungtennis.com/">Click here</a> to visit the homepage.' % player_name
+				self._emailMatchUpdate(other_player, email_message, player_name, 'cancelled')
+			else:
+				# FB
 				self._postFbNotif(other_player, urlquote(player_name + ' has left your match'), match_url)
+
+				# Email
+				email_message = '%s has <b>left</b> your match. <a href="http://www.georgesungtennis.com/%s">Click here</a> to view your match.' % (player_name, match_url)
 				self._emailMatchUpdate(other_player, email_message, player_name, 'left')
 
-		# Return true, for success (how can it fail?)
-		status = BooleanMsg()
-		status.data = True
+			# If owner left, means the entire match is cancelled. Remove this match from other_player's match list
+			if owner_leaving:
+				other_player_profile = ndb.Key(Profile, other_player).get()
+				other_player_profile.matches.remove(match_key)
+				other_player_profile.put()
 
+		# Delete or update Match entity
+		if owner_leaving:
+			match.key.delete()
+		else:
+			match.put()
+
+		# Return true, for success
+		status.data = True
 		return status
 
 	@endpoints.method(StringMsg, BooleanMsg, path='',
