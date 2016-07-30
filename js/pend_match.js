@@ -1,6 +1,5 @@
 // Code below based on:
 // https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
-
 function initAutocomplete() {
 	// Find out the location string
 	var location = document.getElementById('pac-input').value;
@@ -54,6 +53,8 @@ $('#back-button').click(function() {
 });
 
 $('#cancel-button').click(function() {
+	$('.container :input, select, button').attr('disabled', true);
+
 	bootbox.dialog({
 		message: "Are you sure?",
 		buttons: {
@@ -94,7 +95,10 @@ $('#cancel-button').click(function() {
 			},
 			no: {
 				label: "No",
-				className: "btn-default"
+				className: "btn-default",
+				callback: function() {
+					$('.container :input, select, button').attr('disabled', false);
+				}
 			}
 		}
 	});

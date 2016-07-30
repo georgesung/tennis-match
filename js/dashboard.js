@@ -189,19 +189,34 @@ app.controller('ReqCtrl', function(accessToken) {
 			// Call back-end API
 			gapi.client.tennis.createMatch(match).
 				execute(function(resp) {
-					bootbox.dialog({
-						closeButton: false,
-						message: "Match request successful",
-						buttons: {
-							ok: {
-								label: "OK",
-								className: "btn-default",
-								callback: function() {
-									window.location = '/';
+					if (resp.result.data) {
+						bootbox.dialog({
+							closeButton: false,
+							message: "Match request successful",
+							buttons: {
+								ok: {
+									label: "OK",
+									className: "btn-default",
+									callback: function() {
+										window.location = '/';
+									}
 								}
 							}
-						}
-					});
+						});
+					} else {
+						$('.container :input, select, button').attr('disabled', false);
+						bootbox.dialog({
+							closeButton: false,
+							message: "Something went wrong, please try again",
+							buttons: {
+								ok: {
+									label: "OK",
+									className: "btn-default"
+								}
+							}
+						});
+
+					}
 				});
 		}
 	}
@@ -214,7 +229,7 @@ app.controller('MatchCtrl', function(currentMatch) {
 
 app.controller('CpwCtrl', function(accessToken) {
 	var cpw = this;
-	
+
 	cpw.submitForm = function() {
 		var changePasswordMsg = {
 			'oldPw': cpw.oldPassword,

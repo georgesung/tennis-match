@@ -1,6 +1,5 @@
 // Code below based on:
 // https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
-
 function initAutocomplete() {
 	// Find out the location string
 	var location = document.getElementById('pac-input').value;
@@ -55,6 +54,8 @@ $('#back-button').click(function() {
 
 $('#play-button').click(function() {
 	/* Join the match, specify the match key to back-end */
+	$('.container :input, select, button').attr('disabled', true);
+
 	var accessToken = getAccessTokenGlobal();  // OAuth access token
 
 	// Get current match key, create the string message to back-end API

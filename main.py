@@ -767,6 +767,9 @@ class TennisApi(remote.Service):
 	def _createMatch(self, request):
 		"""Create new Match, update user Profile to add new Match to Profile.
 		Returns MatchMsg/request."""
+		status = BooleanMsg()
+		status.data = False
+
 		token = request.accessToken
 		user_id = self._getUserId(token)
 
@@ -805,9 +808,10 @@ class TennisApi(remote.Service):
 		profile.matches.append(match_key.urlsafe())
 		profile.put()
 
-		return request
+		status.data = True
+		return status
 
-	@endpoints.method(MatchMsg, MatchMsg, path='',
+	@endpoints.method(MatchMsg, BooleanMsg, path='',
 		http_method='POST', name='createMatch')
 	def createMatch(self, request):
 		"""Create new Match"""
