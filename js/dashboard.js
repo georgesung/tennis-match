@@ -41,7 +41,6 @@ app.config(['$routeProvider', function($routeProvider) {
 		.when('/pend_match',    {templateUrl: '/templates/pend_match.html', controller: 'MatchCtrl as match'})
 		.when('/avail_match',   {templateUrl: '/templates/avail_match.html', controller: 'MatchCtrl as match'})
 		.when('/change_pw',     {templateUrl: '/templates/change_pw.html', controller: 'CpwCtrl as cpw'})
-		.when('/about',         {templateUrl: '/templates/about.html'})
 		.otherwise({redirectTo:'/'});
 }]);
 
@@ -127,10 +126,6 @@ app.controller('SummaryCtrl', function(currentMatch, accessToken) {
 
 	summary.showChangePw = function() {
 		window.location = '#/change_pw';
-	}
-
-	summary.showAbout = function() {
-		window.location = '#/about';
 	}
 
 	// Set access token from OAuth provider

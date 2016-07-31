@@ -57,6 +57,11 @@ handlers:
   upload: reset_pw\.html
   secure: always
 
+- url: /about
+  static_files: about.html
+  upload: about\.html
+  secure: always
+
 - url: /_ah/spi/.*
   script: main.api
   secure: always
