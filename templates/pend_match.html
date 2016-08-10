@@ -14,6 +14,7 @@
 			<button type="button" class="btn btn-default btn-sm" id="back-button">Back</button>
 		</div>
 		<div class="col-xs-6 text-right">
+			<button type="button" class="btn btn-default btn-sm" id="message-button">Post Message</button>
 			<button type="button" class="btn btn-danger btn-sm" id="cancel-button">Cancel/Leave Match</button>
 		</div>
 	</div>
@@ -24,38 +25,35 @@
 	</div>
 
 	<div class="row">
-		<div class="col-sm-12" id="form-container">
+		<div class="col-sm-6" id="form-container">
 			<form onsubmit="return false">
 
 				<fieldset class="form-group">
 					<label>Player<span ng-if="!match.currentMatch.singles">s</span></label>
-					<textarea class="form-control" rows="3" wrap readonly>{{match.currentMatch.players}}</textarea>
+					<textarea class="form-control" rows="2" wrap readonly>{{match.currentMatch.players}}</textarea>
 				</fieldset>
 
 				<fieldset class="form-group">
-					<label>Date</label>
-					<textarea class="form-control" rows="1" readonly>{{match.currentMatch.date}}</textarea>
-				</fieldset>
-
-				<fieldset class="form-group">
-					<label>Time</label>
-					<textarea class="form-control" rows="1" readonly>{{match.currentMatch.time}}</textarea>
+					<label>Date &amp; Time</label>
+					<textarea class="form-control" rows="1" readonly>{{match.currentMatch.date}}, {{match.currentMatch.time}}</textarea>
 				</fieldset>
 
 				<fieldset class="form-group">
 					<label>Location</label>
 					<textarea id="pac-input" class="form-control" rows="1" readonly>{{match.currentMatch.location}}</textarea>
 				</fieldset>
+
+				<fieldset class="form-group">
+					<label>Messages</label>
+					<textarea class="form-control" rows="5" wrap readonly>blah&#13;&#10;asdf&#13;&#10;blah&#13;&#10;asdf&#13;&#10;blah</textarea>
+				</fieldset>
 			</form>
 		</div>
-	</div>
 
-	<div class="row">
-		<div class="col-sm-12">
+		<div class="col-sm-6">
 			<div id="map" style="height:250px;"></div>
 		</div>
 	</div>
-
 </div>
 
 <script src="/js/pend_match.js"></script>
