@@ -85,40 +85,6 @@ class TennisApi(remote.Service):
 
 		return True
 
-	def _emailMatchUpdate(self, user_id, message, person, action):
-		"""
-		Send match update email to user, via match-update SparkPost template
-		Given user, message content, person-of-interest, action (e.g. joined/left)
-		"""
-		# Get profile of user_id
-		profile_key = ndb.Key(Profile, user_id)
-		profile = profile_key.get()
-
-		# If user disabled email notifications or email is unverified, return
-		if not profile.notifications[1] or not profile.emailVerified:
-			return False
-
-		# Create SparkPost request to send notification email
-		payload = {
-			'recipients': [{
-				'address': {
-					'email': profile.contactEmail,
-					'name': profile.firstName + ' ' + profile.lastName,
-				},
-				'substitution_data': {
-					'first_name': profile.firstName,
-					'message':    message,
-					'person':     person,
-					'action':     action,
-				},
-			}],
-			'content': {
-				'template_id': 'match-update',
-			},
-		}
-
-		return self._postToSparkpost(payload)
-
 	def _emailVerif(self, profile):
 		""" Send verification email, given reference to Profile object. Return success True/False. """
 		# Generate JWT w/ payload of userId and email, secret is EMAIL_VERIF_SECRET
@@ -194,6 +160,40 @@ class TennisApi(remote.Service):
 			}],
 			'content': {
 				'template_id': 'password-reset',
+			},
+		}
+
+		return self._postToSparkpost(payload)
+
+	def _emailMatchUpdate(self, user_id, message, person, action):
+		"""
+		Send match update email to user, via match-update SparkPost template
+		Given user, message content, person-of-interest, action (e.g. joined/left)
+		"""
+		# Get profile of user_id
+		profile_key = ndb.Key(Profile, user_id)
+		profile = profile_key.get()
+
+		# If user disabled email notifications or email is unverified, return
+		if not profile.notifications[1] or not profile.emailVerified:
+			return False
+
+		# Create SparkPost request to send notification email
+		payload = {
+			'recipients': [{
+				'address': {
+					'email': profile.contactEmail,
+					'name': profile.firstName + ' ' + profile.lastName,
+				},
+				'substitution_data': {
+					'first_name': profile.firstName,
+					'message':    message,
+					'person':     person,
+					'action':     action,
+				},
+			}],
+			'content': {
+				'template_id': 'match-update',
 			},
 		}
 
@@ -989,8 +989,23 @@ class TennisApi(remote.Service):
 		match = ndb.Key(urlsafe=match_key).get()
 
 		# Add the new message to match messages
-		match.msgs.append(player_name + '|' + request.data[1])
+		msg = request.data[1]
+		match.msgs.append(player_name + '|' + msg)
 		match.put()
+
+		# Notify all other players that current user/player has posted a message
+		for other_player in match.players:
+			if other_player == user_id:
+				continue
+
+			match_url = '?match_id=' + match_key
+			email_message = '%s has posted a message in your match. To view your match, <a href="http://www.georgesungtennis.com/%s">click here</a>.' % (player_name, match_url)
+			email_message += '<br><br>Message:<br><i>%s</i>' % msg
+
+			# Try FB and email notifications
+			# The functions themselves will test if FB user and/or if they enabled the notification
+			self._postFbNotif(other_player, urlquote(player_name + ' has posted a message in your match'), match_url)
+			self._emailMatchUpdate(other_player, email_message, player_name, 'posted a message in')
 
 		status.data = True
 		return status
