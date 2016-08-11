@@ -1,5 +1,8 @@
+////////////////////////////////////////////////////////////////////
+// Google Maps code
 // Code below based on:
 // https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
+////////////////////////////////////////////////////////////////////
 function initAutocomplete() {
 	// Find out the location string
 	var location = document.getElementById('pac-input').value;
@@ -47,9 +50,34 @@ function locSearchCallback(results, status) {
 	}
 }
 
+
+////////////////////////////////////////////////////////////////////
 // On-click handlers
+////////////////////////////////////////////////////////////////////
 $('#back-button').click(function() {
 	window.location = '/';
+});
+
+$('#message-button').click(function() {
+	$('.container :input, select, button').attr('disabled', true);
+
+	var accessToken = getAccessTokenGlobal();  // OAuth access token
+
+	bootbox.prompt("Please enter your message", function(result) {
+		if (result !== null) {
+			// Get current match key, create the message to back-end API and post to back-end
+			var $scope = $('#dashboard').scope();
+			var msg = {data: [$scope.match.currentMatch.key, result], accessToken: accessToken};
+
+			gapi.client.tennis.postMatchMsg(msg).execute();
+
+			// Update messages text area
+			// Just do full page reload for now
+			window.location = '/?match_id=' + $scope.match.currentMatch.key;
+		}
+	});
+
+	$('.container :input, select, button').attr('disabled', false);
 });
 
 $('#cancel-button').click(function() {

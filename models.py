@@ -11,7 +11,9 @@ from google.appengine.ext import ndb
 
 import datetime
 
+##############################################
 # User profile, and its messages
+##############################################
 class Profile(ndb.Model):
 	userId        = ndb.StringProperty(required=True)
 	contactEmail  = ndb.StringProperty(default='')
@@ -50,12 +52,9 @@ class ChangePasswordMsg(messages.Message):
 	accessToken = messages.StringField(3)
 
 
-# Access token message
-class AccessTokenMsg(messages.Message):
-	accessToken = messages.StringField(1)
-
-
+##############################################
 # Match object, and its messages
+##############################################
 class Match(ndb.Model):
 	singles   = ndb.BooleanProperty(required=True)
 	dateTime  = ndb.DateTimeProperty(required=True)  # naive time, no time zone info, assuming "local" timezone
@@ -63,6 +62,7 @@ class Match(ndb.Model):
 	players   = ndb.StringProperty(repeated=True)  # userIds
 	confirmed = ndb.BooleanProperty(required=True)
 	ntrp      = ndb.FloatProperty(required=True)  # NTRP rating of owner of match, standardized to male rating
+	msgs      = ndb.StringProperty(repeated=True)  # messages posted by players in a match
 
 class MatchMsg(messages.Message):
 	singles   = messages.BooleanField(1)
@@ -88,11 +88,24 @@ class MatchesMsg(messages.Message):
 	accessToken = messages.StringField(8)
 
 
+##############################################
+# Access token message
+##############################################
+class AccessTokenMsg(messages.Message):
+	accessToken = messages.StringField(1)
+
+
+##############################################
 # Generic data messages
+##############################################
 class BooleanMsg(messages.Message):
 	data = messages.BooleanField(1)
 	accessToken = messages.StringField(2)
 
 class StringMsg(messages.Message):
 	data = messages.StringField(1)
+	accessToken = messages.StringField(2)
+
+class StringArrayMsg(messages.Message):
+	data = messages.StringField(1, repeated=True)
 	accessToken = messages.StringField(2)

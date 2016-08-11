@@ -27,9 +27,10 @@ from models import ChangePasswordMsg
 from models import Match
 from models import MatchMsg
 from models import MatchesMsg
+from models import AccessTokenMsg
 from models import StringMsg
 from models import BooleanMsg
-from models import AccessTokenMsg
+from models import StringArrayMsg
 
 # Custom accounts
 from settings import CA_SECRET
@@ -906,35 +907,12 @@ class TennisApi(remote.Service):
 		match_key = request.data
 		match = ndb.Key(urlsafe=match_key).get()
 
-		'''
-		# If cancelling player is the "owner" of the match and match has >1 player,
-		# find new owner to update Match's ntrp
-		if match.players[0] == user_id and len(match.players) > 1:
-			new_owner = ndb.Key(Profile, match.players[1]).get()
-
-			ntrp = new_owner.ntrp
-			if new_owner.gender == 'f':
-				ntrp -= 0.5
-
-			match.ntrp = ntrp
-		'''
-
 		# Determine if cancelling player is the owner of the match
 		owner_leaving = match.players[0] == user_id
 
 		# Update 'players' and 'confirmed' fields
 		match.players.remove(user_id)
 		match.confirmed = False
-
-		'''
-		# Update Match in ndb
-		match_removed = False
-		if len(match.players) == 0:
-			match.key.delete()
-			match_removed = True
-		else:
-			match.put()
-		'''
 
 		# Remove current match key from current user's matches list
 		profile = ndb.Key(Profile, user_id).get()
@@ -984,6 +962,59 @@ class TennisApi(remote.Service):
 	def cancelMatch(self, request):
 		"""Cancel an existing Match, given Match's key"""
 		return self._cancelMatch(request)
+
+
+	@endpoints.method(StringArrayMsg, BooleanMsg, path='',
+		http_method='POST', name='postMatchMsg')
+	def postMatchMsg(self, request):
+		"""
+		Post message to an existing Match, given Match's key
+		Match key is in request.data[0], the message is in request.data[1]
+		"""
+		status = BooleanMsg()
+		status.data = False
+
+		# If empty message, return False
+		if request.data[1] == '':
+			return status
+
+		# Find user's name
+		token = request.accessToken
+		user_id = self._getUserId(token)
+		profile = ndb.Key(Profile, user_id).get()
+		player_name = profile.firstName + ' ' + profile.lastName
+
+		# Get match key, then get the Match entity from db
+		match_key = request.data[0]
+		match = ndb.Key(urlsafe=match_key).get()
+
+		# Add the new message to match messages
+		match.msgs.append(player_name + '|' + request.data[1])
+		match.put()
+
+		status.data = True
+		return status
+
+	@endpoints.method(StringMsg, StringArrayMsg, path='',
+		http_method='POST', name='getMatchMsgs')
+	def getMatchMsgs(self, request):
+		"""
+		Get all match messages, given Match's key
+		"""
+		msgs = StringArrayMsg()
+
+		# Authenticate user
+		token = request.accessToken
+		user_id = self._getUserId(token)
+		if user_id is None:
+			return None
+
+		# From match key, get Match entity, and get match messages
+		match_key = request.data
+		match = ndb.Key(urlsafe=match_key).get()
+		msgs.data = match.msgs
+
+		return msgs
 
 
 	###################################################################

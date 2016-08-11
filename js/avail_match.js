@@ -1,5 +1,8 @@
+////////////////////////////////////////////////////////////////////
+// Google Maps code
 // Code below based on:
 // https://developers.google.com/maps/documentation/javascript/examples/places-searchbox
+////////////////////////////////////////////////////////////////////
 function initAutocomplete() {
 	// Find out the location string
 	var location = document.getElementById('pac-input').value;
@@ -47,7 +50,10 @@ function locSearchCallback(results, status) {
 	}
 }
 
+
+////////////////////////////////////////////////////////////////////
 // On-click handlers
+////////////////////////////////////////////////////////////////////
 $('#back-button').click(function() {
 	window.location = '/';
 });
