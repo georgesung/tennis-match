@@ -1,13 +1,4 @@
 // Facebook SDK & OAuth
-window.fbAsyncInit = function() {
-	FB.init({
-		appId      : '1739379949638650',
-		cookie     : false, // enable cookies to allow the server to access the session?
-		xfbml      : true,  // parse social plugins on this page?
-		version    : 'v2.7'
-	});
-};
-
 (function(d, s, id){
 	var js, fjs = d.getElementsByTagName(s)[0];
 	if (d.getElementById(id)) {return;}
@@ -15,6 +6,25 @@ window.fbAsyncInit = function() {
 	js.src = "//connect.facebook.net/en_US/sdk.js";
 	fjs.parentNode.insertBefore(js, fjs);
 }(document, 'script', 'facebook-jssdk'));
+
+window.fbAsyncInit = function() {
+	FB.init({
+		appId      : '1739379949638650',
+		cookie     : false, // enable cookies to allow the server to access the session?
+		xfbml      : true,  // parse social plugins on this page?
+		version    : 'v2.7'
+	});
+
+	// Additional intialization code
+	// Quick redirect for users not auth'ed
+	if (localStorage.tennisJwt === undefined) {
+		FB.getLoginStatus(function(response) {
+			if (response.status !== 'connected') {
+				window.location = '/login';
+			}
+		});
+	}
+};
 
 function getAccessTokenGlobal() {
 	/* Get valid access token from localStorage or FB. If invalid, redirect to login page. */
