@@ -17,12 +17,14 @@ window.fbAsyncInit = function() {
 
 	// Additional intialization code
 	// Quick redirect for users not auth'ed
-	if (localStorage.tennisJwt === undefined) {
-		FB.getLoginStatus(function(response) {
-			if (response.status !== 'connected') {
-				window.location = '/login';
-			}
-		});
+	if (window.location.pathname !== '/login') {
+		if (localStorage.tennisJwt === undefined) {
+			FB.getLoginStatus(function(response) {
+				if (response.status !== 'connected') {
+					window.location = '/login';
+				}
+			});
+		}
 	}
 };
 
