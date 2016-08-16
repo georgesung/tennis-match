@@ -10,7 +10,11 @@ function getMatchMsgs() {
 
 	gapi.client.tennis.getMatchMsgs(matchKey).execute(function(resp) {
 
-		if (resp.result.data === undefined) {console.log('error from back-end');}
+		if (resp.result.data === undefined) {
+			// No messages, return
+			return;
+		}
+		
 		var msgs = resp.result.data;
 
 		// Text string to display all messages
