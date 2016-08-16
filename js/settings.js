@@ -16,8 +16,8 @@ window.fbAsyncInit = function() {
 	});
 
 	// Additional intialization code
-	// Quick redirect for users not auth'ed
-	if (window.location.pathname !== '/login') {
+	// Quick redirect for users not auth'ed in homepage
+	if (window.location.pathname === '/') {
 		if (localStorage.tennisJwt === undefined) {
 			FB.getLoginStatus(function(response) {
 				if (response.status !== 'connected') {
