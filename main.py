@@ -199,6 +199,38 @@ class TennisApi(remote.Service):
 
 		return self._postToSparkpost(payload)
 
+	def _emailAvailMatch(self, partner, message, player_name):
+		"""
+		Send notification to potential parter of a newly created match
+		'partner' is the person to send the email to, a Profile object
+		'player_name' is the name of the person who created the match, a string
+		"""
+		profile = partner
+
+		# If user disabled email notifications or email is unverified, return
+		if not profile.notifications[1] or not profile.emailVerified:
+			return False
+
+		# Create SparkPost request to send notification email
+		payload = {
+			'recipients': [{
+				'address': {
+					'email': profile.contactEmail,
+					'name': profile.firstName + ' ' + profile.lastName,
+				},
+				'substitution_data': {
+					'first_name': profile.firstName,
+					'message':    message,
+					'person':     player_name,
+				},
+			}],
+			'content': {
+				'template_id': 'available-match-notification',
+			},
+		}
+
+		return self._postToSparkpost(payload)
+
 
 	@endpoints.method(AccessTokenMsg, StringMsg, path='',
 		http_method='POST', name='verifyEmailToken')
@@ -767,6 +799,7 @@ class TennisApi(remote.Service):
 	@ndb.transactional(xg=True)
 	def _createMatch(self, request):
 		"""Create new Match, update user Profile to add new Match to Profile.
+		Also notify all applicable users this new match is available to them.
 		Returns MatchMsg/request."""
 		status = BooleanMsg()
 		status.data = False
@@ -798,25 +831,60 @@ class TennisApi(remote.Service):
 
 		# Convert date/time from string to datetime object
 		dt_string = data['date'] + '|' + data['time']
+		dt_string2 = 'on ' + data['date'] + ' at ' + data['time']  # used for notifications
 		data['dateTime'] = datetime.strptime(dt_string, '%m/%d/%Y|%H:%M')
 		del data['date']
 		del data['time']
 
 		# Create new match based on data, and put in datastore
-		match_key = Match(**data).put()
+		match_key = Match(**data).put().urlsafe()
 
 		# Update user profile, adding the new match to Profile.matches
-		profile.matches.append(match_key.urlsafe())
+		profile.matches.append(match_key)
 		profile.put()
 
 		status.data = True
-		return status
+		return status, profile, match_key, dt_string2
+
+	def _notifyAvailMatch(self, profile, match_key, dt_string):
+		""" Notify all potential partners of newly created match """
+		# FIXME: Put this functionality in a task queue
+
+		# Get name and NTRP of currently player
+		player_name = profile.firstName + ' ' + profile.lastName
+		my_ntrp = profile.ntrp
+		if profile.gender == 'f':
+			my_ntrp -= 0.5
+
+		# Query the DB to find partners of similar skill
+		query = Profile.query(ndb.OR(Profile.ntrp == my_ntrp, Profile.ntrp == my_ntrp + 0.5, Profile.ntrp == my_ntrp - 0.5))
+
+		for partner in query:
+			# Current user does not get notified
+			if profile.userId == partner.userId:
+				continue
+
+			# Notify the potential partner
+			match_url = '?match_id=' + match_key
+			email_message = 'You have a new available match with %s %s.' % (player_name, dt_string)
+			email_message += '<br>To view the match, <a href="http://www.georgesungtennis.com/%s">click here</a>.' % match_url
+
+			# Try FB and email notifications
+			# The functions themselves will test if FB user and/or if they enabled the notification
+			self._postFbNotif(partner.userId, urlquote('New available match with ' + player_name + ' ' + dt_string), match_url)
+			self._emailAvailMatch(partner, email_message, player_name)
+
 
 	@endpoints.method(MatchMsg, BooleanMsg, path='',
 		http_method='POST', name='createMatch')
 	def createMatch(self, request):
 		"""Create new Match"""
-		return self._createMatch(request)
+		#return self._createMatch(request)
+
+		status, profile, match_key, dt_string = self._createMatch(request)
+		self._notifyAvailMatch(profile, match_key, dt_string)
+
+		return status
 
 
 	@ndb.transactional(xg=True)

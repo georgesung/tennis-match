@@ -363,6 +363,20 @@ function showMatches(accessToken) {
 
 			$scope.summary.filterMatches();
 		});
+
+		// If we only want to show one particular match, url query string will have match_id
+		var matchId = getParameterByName('match_id');
+		if (matchId !== null && matchId !== '') {
+			// Search for match in avail match list
+			for (var i = 0; i < availableMatches.length; i++) {
+				var match = availableMatches[i];
+				if (matchId === match.key) {
+					$scope.$apply(function () {
+						$scope.summary.showAvailMatch(match);
+					});
+				}
+			}
+		}
 	});
 }
 
