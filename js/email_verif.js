@@ -28,7 +28,7 @@ function onGapiLoad() {
 				$('#status').html(status);
 			} else {
 				// Email verif successful
-				status = 'You have successfully verified <b>' + resp.result.data +
+				status = '<h4>Success</h4>You have successfully verified <b>' + resp.result.data +
 					'</b><br>You can close this window, or <a href="/">visit the homepage</a></div>';
 
 				$('#status').html(status);
