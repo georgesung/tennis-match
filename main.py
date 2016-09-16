@@ -865,7 +865,7 @@ class TennisApi(remote.Service):
 				continue
 
 			# Notify the potential partner
-			match_url = '?match_id=' + match_key
+			match_url = '?match_type=avail&match_id=' + match_key
 			email_message = 'You have a new available match with %s %s.' % (player_name, dt_string)
 			email_message += '<br>To view the match, <a href="http://www.georgesungtennis.com/%s">click here</a>.' % match_url
 
@@ -935,7 +935,7 @@ class TennisApi(remote.Service):
 			if other_player == user_id:
 				continue
 
-			match_url = '?match_id=' + match_key
+			match_url = '?match_type=conf_pend&match_id=' + match_key
 			email_message = '%s has <b>joined</b> your match. To view your match, <a href="http://www.georgesungtennis.com/%s">click here</a>.' % (player_name, match_url)
 
 			# Try FB and email notifications
@@ -989,7 +989,7 @@ class TennisApi(remote.Service):
 
 		# Notify all other players that current user/player has left the match
 		player_name = profile.firstName + ' ' + profile.lastName
-		match_url = '?match_id=' + match_key
+		match_url = '?match_type=conf_pend&match_id=' + match_key
 
 		for other_player in match.players:
 			# Try FB and email notifications
@@ -1066,7 +1066,7 @@ class TennisApi(remote.Service):
 			if other_player == user_id:
 				continue
 
-			match_url = '?match_id=' + match_key
+			match_url = '?match_type=conf_pend&match_id=' + match_key
 			email_message = '%s has posted a message in your match. To view your match, <a href="http://www.georgesungtennis.com/%s">click here</a>.' % (player_name, match_url)
 			email_message += '<br><br>Message:<br><i>%s</i>' % msg
 

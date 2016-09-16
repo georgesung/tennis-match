@@ -271,14 +271,18 @@ app.controller('CpwCtrl', function(accessToken) {
 function showMatches(accessToken) {
 	var $scope = $('#dashboard').scope();
 
+	// Get and validate URL query strings
+	var matchId = getParameterByName('match_id');
+	var validMatchId = matchId !== null && matchId !== '';
+	var matchType = getParameterByName('match_type');
+
 	// Get all matches for current user, populate Confirmed Matches and Pending Matches
 	gapi.client.tennis.getMyMatches({accessToken: accessToken}).execute(function(resp) {
-		if (resp.result.singles === undefined) { return; }
-
+		//if (resp.result.singles === undefined) { return; }
 		// The MatchesMsg message is stored in resp.result
 		// Go through all matches in the match "list" (see models.py for format)
 		var matches = resp.result;
-		var num_matches = matches.singles.length;
+		var num_matches = (resp.result.singles === undefined) ? 0 : matches.singles.length;
 
 		var confirmedMatches = [];
 		var pendingMatches = [];
@@ -309,13 +313,16 @@ function showMatches(accessToken) {
 			$scope.summary.filterMatches();
 		});
 
-		// If we only want to show one particular match, url query string will have match_id
-		var matchId = getParameterByName('match_id');
-		if (matchId !== null && matchId !== '') {
+		// Show one particular match
+		if (validMatchId && matchType === 'conf_pend') {
 			// Search for match in conf/pend match lists
+			var match_found = false;
+
 			for (var i = 0; i < confirmedMatches.length; i++) {
 				var match = confirmedMatches[i];
 				if (matchId === match.key) {
+					match_found = true;
+
 					$scope.$apply(function () {
 						$scope.summary.showConfMatch(match);
 					});
@@ -324,22 +331,37 @@ function showMatches(accessToken) {
 			for (var i = 0; i < pendingMatches.length; i++) {
 				var match = pendingMatches[i];
 				if (matchId === match.key) {
+					match_found = true;
+
 					$scope.$apply(function () {
 						$scope.summary.showPendMatch(match);
 					});
 				}
+			}
+
+			if (!match_found) {
+				bootbox.dialog({
+					closeButton: false,
+					message: 'Sorry, this match is no longer available',
+					buttons: {
+						ok: {
+							label: "OK",
+							className: "btn-default"
+						}
+					}
+				});
 			}
 		}
 	});
 
 	// Query all available matches for current user, populate Available Matches
 	gapi.client.tennis.getAvailableMatches({accessToken: accessToken}).execute(function(resp) {
-		if (resp.result.singles === undefined) { return; }
+		//if (resp.result.singles === undefined) { return; }
 
 		// The MatchesMsg message is stored in resp.result
 		// Go through all matches in the match "list" (see models.py for format)
 		var matches = resp.result;
-		var num_matches = matches.singles.length;
+		var num_matches = (resp.result.singles === undefined) ? 0 : matches.singles.length;
 
 		var availableMatches = [];
 
@@ -364,17 +386,32 @@ function showMatches(accessToken) {
 			$scope.summary.filterMatches();
 		});
 
-		// If we only want to show one particular match, url query string will have match_id
-		var matchId = getParameterByName('match_id');
-		if (matchId !== null && matchId !== '') {
+		// Show one particular match
+		if (validMatchId && matchType === 'avail') {
 			// Search for match in avail match list
+			var match_found = false;
+
 			for (var i = 0; i < availableMatches.length; i++) {
 				var match = availableMatches[i];
 				if (matchId === match.key) {
+					match_found = true;
 					$scope.$apply(function () {
 						$scope.summary.showAvailMatch(match);
 					});
 				}
+			}
+
+			if (!match_found) {
+				bootbox.dialog({
+					closeButton: false,
+					message: 'Sorry, this match is no longer available',
+					buttons: {
+						ok: {
+							label: "OK",
+							className: "btn-default"
+						}
+					}
+				});
 			}
 		}
 	});
