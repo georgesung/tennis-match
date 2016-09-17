@@ -73,7 +73,7 @@ $('#message-button').click(function() {
 
 			// Update messages text area
 			// Just do full page reload for now
-			window.location = '/?match_id=' + $scope.match.currentMatch.key;
+			window.location = '/?match_type=conf_pend&match_id=' + $scope.match.currentMatch.key;
 		}
 	});
 
