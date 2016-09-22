@@ -1,16 +1,7 @@
-Under construction! Here's some info:
+# Tennis Match-Making Web App
 
-Google App Engine:
+This web app matches tennis players of similar skill level (+/- 0.5 NTRP), at a mutually convenient time and place. The app is currently available at:
 
-Run local GAE server:
-dev_appserver.py ./
+http://www.georgesungtennis.com
 
-Then to go:
-http://localhost:8080
-
-To deploy to tennismatch-1314.appspot.com:
-appcfg.py -A tennismatch-1314 -V <v123> update ./
-
-To do FB/Google/blah login, use Google Identity Toolkit with GAE, it's a bit complicated:
-https://developers.google.com/identity/toolkit/web/quickstart/python#step_1_configure_the_google_identity_toolkit_api
-http://stackoverflow.com/questions/31082344/is-google-identity-toolkit-v3-compatible-with-gae-python-sandbox
+It is free to sign up and use the web app! Currently the app is in its early phases, so any feedback and/or suggestions are appreciated. Also, only the Boston area is supported at this time.
